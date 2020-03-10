@@ -1,0 +1,28 @@
+{
+  "name": "auth-test",
+  "version": "1.0.0",
+  "description": "auth-test-bed",
+  "main": "auth.js",
+  "dependencies": {
+    "jsonwebtoken": "^8.5.1",
+    "passport": "^0.4.1",
+    "passport-jwt": "^4.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jurelmartin/auth-test.git"
+  },
+  "keywords": [
+    "auth"
+  ],
+  "author": "jagustin@stratpoint.com <jagustin@stratpoint.com> (https://github.com/jurelmartin/FTAuth.git)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jurelmartin/auth-test/issues"
+  },
+  "homepage": "https://github.com/jurelmartin/auth-test#readme"
+}
