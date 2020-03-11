@@ -5,6 +5,7 @@ const {expect} = require('chai');
 const auth = require('../auth');
 const model = require('../AuthHelper/database/model');
 const sinon = require('sinon')
+const { ExtractJwt, Strategy } = require('passport-jwt');
 
 
 describe("auth-test :: auth", () => {
@@ -32,14 +33,13 @@ describe("auth-test :: auth", () => {
     context('params parameter', () => {
         beforeEach(()=> {
             auth(config, userModel)
-
+            sinon.stub(ExtractJwt, 'fromAuthHeaderWithScheme')
         })
-        it("should throw not authenticated", () => {
-            const test = authenticate()
-            
-            console.log(test().toString())
-            // expect(mockConfig).to.equal(config)
-        })
+            it("should not accept if jwtFromRequest is empty", () => {
+                ExtractJwt.fromAuthHeaderWithScheme.returns(false)
+                expect(ExtractJwt.fromAuthHeaderWithScheme()).to.equal(false)
+                ExtractJwt.fromAuthHeaderWithScheme.restore()
+            })
     })
 
 });
