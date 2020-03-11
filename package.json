@@ -1,21 +1,21 @@
 {
-  "name": "auth-test",
+  "name": "brewery-auth-test",
   "version": "1.0.0",
-  "description": "auth-test-bed",
+  "description": "brewery-auth-test-bed",
   "main": "auth.js",
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
-    "mysql2": "^2.1.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
-    "pg": "^7.18.2",
-    "postgres": "^1.0.2",
-    "ramda": "^0.27.0",
-    "sequelize": "^5.21.5",
-    "sinon": "^9.0.1",
-    "sqlite3": "^4.1.1"
+    "ramda": "^0.27.0"
   },
   "devDependencies": {
+    "pg": "^7.18.2",
+    "sinon": "^9.0.1",
+    "sqlite3": "^4.1.1",
+    "postgres": "^1.0.2",
+    "sequelize": "^5.21.5",
+    "mysql2": "^2.1.0",
     "chai": "^4.2.0",
     "chai-change": "^2.1.2",
     "dirty-chai": "^2.0.1",
@@ -32,10 +32,13 @@
   "keywords": [
     "auth"
   ],
-  "author": "jagustin@stratpoint.com <jagustin@stratpoint.com> (https://github.com/jurelmartin/FTAuth.git)",
+  "author": "jagustin@stratpoint.com <jagustin@stratpoint.com>",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/jurelmartin/auth-test/issues"
   },
-  "homepage": "https://github.com/jurelmartin/auth-test#readme"
+  "homepage": "https://github.com/jurelmartin/auth-test#readme",
+  "directories": {
+    "test": "test"
+  }
 }

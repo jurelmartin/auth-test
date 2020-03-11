@@ -24,6 +24,10 @@ describe("auth-test :: auth", () => {
         it("should expect the initialize function", () => {
             expect(initialize).to.be.not.undefined()
         })
+
+        it("testing lang", ()=> {
+            auth(config, userModel)
+        })
     }),
     context('authenticate function', () => {
         it("should expect the authenticate function", () => {
@@ -40,6 +44,7 @@ describe("auth-test :: auth", () => {
                 expect(ExtractJwt.fromAuthHeaderWithScheme()).to.equal(false)
                 ExtractJwt.fromAuthHeaderWithScheme.restore()
             })
+
     })
 
 });
