@@ -6,7 +6,7 @@ const {
   partialRight
 } = require('ramda')
 
-module.exports = ({ config }) => ({
+module.exports = (config) => ({
   signin: (options) => (payload) => {
     const opt = Object.assign({}, options, { expiresIn: '1h' })
     return jwt.sign(payload, config.authSecret, opt)

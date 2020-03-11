@@ -5,12 +5,24 @@
   "main": "auth.js",
   "dependencies": {
     "jsonwebtoken": "^8.5.1",
+    "mysql2": "^2.1.0",
     "passport": "^0.4.1",
-    "passport-jwt": "^4.0.0"
+    "passport-jwt": "^4.0.0",
+    "pg": "^7.18.2",
+    "postgres": "^1.0.2",
+    "ramda": "^0.27.0",
+    "sequelize": "^5.21.5",
+    "sqlite3": "^4.1.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-change": "^2.1.2",
+    "dirty-chai": "^2.0.1",
+    "mocha": "^7.1.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --opts test/mocha.opts.test",
+    "test:watch": "mocha --watch --opts test/mocha.opts.test"
   },
   "repository": {
     "type": "git",
