@@ -30,16 +30,3 @@ describe("auth-test :: auth", () => {
     })
 
 });
-
-
-  // const user = {
-  //   firstName: 'jerico',
-  //   lastName: 'estanislao',
-  //   middleName: 'esquibel',
-  //   email: 'jestanislao@stratpoint.com',
-  //   password: '12345',
-  //   roleId: 2
-
-  // 
-
-
