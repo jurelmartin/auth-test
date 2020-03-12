@@ -7,7 +7,7 @@ module.exports = (config, userModel) => {
 
   const params = {
     secretOrKey: config.authSecret,
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken('jwt')
+    jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme('jwt')
   }
 
   const strategy = new Strategy(params, (payload, done) => {
