@@ -7,7 +7,7 @@ module.exports = (config, userModel) => {
 
   const params = {
     secretOrKey: config.authSecret,
-    jwtFromRequest: ExtractJwt.fromHeader('authorization')
+    jwtFromRequest: ExtractJwt.fromHeader('Authorization')
   }
 
   const strategy = new Strategy(params, (payload, done) => {
