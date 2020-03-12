@@ -6,7 +6,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 
 module.exports = (config, userModel) => {
   let opts = {};
-   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
+   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
    opts.secretOrKey = config.secret;
 
 
@@ -19,7 +19,7 @@ module.exports = (config, userModel) => {
   })
 
   passport.use(strategy)
-
+ 
   passport.serializeUser(function (user, done) {
     done(null, user)
   })
