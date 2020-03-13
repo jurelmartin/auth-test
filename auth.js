@@ -29,11 +29,16 @@ module.exports = (config, userModel) => {
   })
 
   return {
-    initialize: () => {
-      return passport.initialize()
-    },
     authenticate: () => {
       return passport.authenticate('jwt')
     }
   }
+}
+module.exports = () => {
+  return {
+    initialize: () => {
+      return passport.initialize()
+    }
+  }
+
 }
