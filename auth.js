@@ -6,7 +6,7 @@ const ExtractJwt = require('passport-jwt').ExtractJwt;
 
 module.exports = (config, UserRepository) => {
   let opts = {};
-   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
+   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
    opts.secretOrKey = config.secret;
 
   console.log('log from auth-test');
