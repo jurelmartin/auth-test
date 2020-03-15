@@ -9,7 +9,7 @@ module.exports = (config, UserRepository) => {
    opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
    opts.secretOrKey = config.secret;
 
-
+  console.log(opts.jwtFromRequest);
   const strategy = new JwtStrategy(opts, (payload, done) => {
     UserRepository.getById(payload.id)
       .then((user) => {
