@@ -30,12 +30,16 @@ module.exports = (config, UserRepository) => {
     done(null, user)
   })
 
+
+}
+module.exports = () => {
   return {
     authenticate: () => {
       return passport.authenticate('jwt')
     }
   }
 }
+
 module.exports = () => {
   return {
     initialize: () => {
