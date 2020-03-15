@@ -4,9 +4,9 @@ const passport = require('passport');
 const { ExtractJwt, Strategy } = require('passport-jwt');
 
 module.exports = (config, UserRepository) => {
-  opts = {
-    secretOrKey = config.secret,
-    jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
+  const opts = {
+    secretOrKey : config.secret,
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
   };
 
   console.log(ExtractJwt.fromAuthHeaderAsBearerToken())
