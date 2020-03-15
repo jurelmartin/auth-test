@@ -1,16 +1,16 @@
 
 
 const passport = require('passport');
-const JwtStrategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
+const { ExtractJwt, Strategy } = require('passport-jwt');
 
 module.exports = (config, UserRepository) => {
-  let opts = {};
-   opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
-   opts.secretOrKey = config.secret;
+  opts = {
+    secretOrKey = config.secret,
+    jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
+  };
 
-  console.log('log from auth-test');
-  const strategy = new JwtStrategy(opts, (payload, done) => {
+  console.log(ExtractJwt.fromAuthHeaderAsBearerToken())
+  const strategy = new Strategy(opts, (payload, done) => {
     
     console.log(payload)
     UserRepository.getById(payload.id)
@@ -30,21 +30,29 @@ module.exports = (config, UserRepository) => {
     done(null, user)
   })
 
-
-}
-module.exports = () => {
   return {
+    initialize: () => {
+      return passport.initialize()
+    },
     authenticate: () => {
       return passport.authenticate('jwt')
     }
   }
-}
-
-module.exports = () => {
-  return {
-    initialize: () => {
-      return passport.initialize()
-    }
-  }
 
 }
+// module.exports = () => {
+//   return {
+//     authenticate: () => {
+//       return passport.authenticate('jwt')
+//     }
+//   }
+// }
+
+// module.exports = () => {
+//   return {
+//     initialize: () => {
+//       return passport.initialize()
+//     }
+//   }
+
+// }
