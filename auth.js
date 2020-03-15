@@ -9,8 +9,9 @@ module.exports = (config, UserRepository) => {
    opts.jwtFromRequest = ExtractJwt.fromAuthHeaderWithScheme('JWT');
    opts.secretOrKey = config.secret;
 
-
+  console.log('log from auth-test');
   const strategy = new JwtStrategy(opts, (payload, done) => {
+    
     console.log(payload)
     UserRepository.getById(payload.id)
       .then((user) => {
