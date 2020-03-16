@@ -20,7 +20,7 @@ exports.authenticate = () => {
       
 
       passport.use(new Strategy(jwtOptions, (jwt_payload, done) => {
-        console.log('payload is', jwt_payload.id);
+        // console.log('payload is', jwt_payload.id);
         repository.getById(jwt_payload.id)
           .then((user) => {
             // console.log(user);
