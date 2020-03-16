@@ -1,49 +1,51 @@
 const passport = require('passport');
-const JwtStrategy = require('passport-jwt').Strategy;
+const {ExtractJwt, Strategy} = require('passport-jwt');
+let config, repository;
 
+exports.initialize = (inputConfig, inputRepository) => {
 
-module.exports = (config, UserRepository) => {
+  config = inputConfig;
+  repository = inputRepository;
 
-  const strategyOptions = {
-    secretOrKey : config.secret,
-    jwtFromRequest: req => req.headers.cookie,
-    passReqToCallback: true
-  };
+  return passport.initialize();
+};
 
-  const verifyCallback = async (req, jwtPayload, cb) => {
-    const [err, user] = await UserRepository.getById(jwtPayload.dataValues.id)
-    console.log(user);
-    if(err) {
-      return cb(err)
-    }
-    req.user = user
-    return cb(null, user)
-  }
+exports.authenticate = () => {
+  return [
+    (req, res, next) => {
 
-  passport.use(new JwtStrategy(strategyOptions, verifyCallback))
+      const jwtOptions = {};
+      jwtOptions.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
+      jwtOptions.secretOrKey = config.authSecret;  
+      
 
-
-
-  passport.serializeUser((user, done) => done (null, user.dataValues.id))
-
-
+      passport.use(new Strategy(jwtOptions, (jwt_payload, done) => {
+        console.log('payload is', jwt_payload.id);
+        repository.getById(jwt_payload.id)
+          .then((user) => {
+            console.log(user);
+            done(null, user.dataValues);
+          })
+          .catch((error) =>  done(error, null));
+      }));
   
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const user = await UserRepository.getById(id)
-      return done(null, user)
-    }catch (err) {
-      return done(err, null)
+      passport.serializeUser(function (user, done) {
+        done(null, user);
+      });
+  
+      passport.deserializeUser(function (user, done) {
+        done(null, user);
+      });
+  
+      return passport.authenticate('jwt', (err, user, info)=> {
+        if(!user){
+          res.status(401).json({
+            status: 401,
+            message: 'Not Authenticated'
+          });
+        }
+        next();
+      })(req, res, next);
     }
-  })
-
-  return {
-    initialize: () => {
-      return passport.initialize()
-    },
-    authenticate: () => {
-      return passport.authenticate('jwt')
-    }
-  }
-
-}
+  ];
+};
