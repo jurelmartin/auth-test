@@ -23,7 +23,7 @@ exports.authenticate = () => {
         console.log('payload is', jwt_payload.id);
         repository.getById(jwt_payload.id)
           .then((user) => {
-            console.log(user);
+            // console.log(user);
             done(null, user.dataValues);
           })
           .catch((error) =>  done(error, null));
