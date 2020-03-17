@@ -1,8 +1,6 @@
-const model = require('./model')
-
 class repository {
   
-  constructor({model}) {
+  constructor(model) {
     this.model = model;
   }
 

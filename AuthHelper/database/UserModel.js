@@ -1,9 +1,9 @@
 // const { encryptPassword } = require('../../encryption')
-const { Sequelize, Model, DataTypes } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const db = require('./Db');
 
 
-  const User = db.define('users',{
+  const UserModel = db.define('users',{
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -54,4 +54,4 @@ const db = require('./Db');
       allowNull: true
     }
   })
-module.exports = User;
+module.exports = UserModel;

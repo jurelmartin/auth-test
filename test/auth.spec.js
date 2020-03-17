@@ -3,7 +3,7 @@ const {assert} = require('chai');
 const auth = require('../auth');
 
 const UserRepository = require('../AuthHelper/database/repository')
-
+const BreweryAuth = require('../breweryLike');
 
 describe("auth-test :: auth", () => {
     const config = { authSecret: 'supersecretkey' };
@@ -26,6 +26,26 @@ describe("auth-test :: auth", () => {
         it("should expect the authenticate function", () => {
             assert.isFunction(authenticate, 'authenticate() not defined')
         })
+    })
+
+    context('breweryAuth', () => {
+        const dbCredentials = {
+            databaseName: 'postgres',
+            username: 'postgres',
+            password: 'root',
+            dialect: 'postgres',
+            host: 'localhost'
+        }
+        const user = {
+            username: 'jerico',
+            email: 'jestanislao@stratpoint.com'
+        }
+        it('output', () => {
+            // const brewery = new BreweryAuth(dbCredentials).register(user)
+            // console.log(brewery)
+    
+        })
+
     })
 
 
