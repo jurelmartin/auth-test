@@ -1,29 +1,56 @@
 // FOR NON-SERVERLESS
 const InitializeDatabase = require('./lib/InitializeDatabase');
+const {createTokens, refreshTokens} = require('./lib/TokenCreations');
 const passport = require('passport');
 const { ExtractJwt, Strategy } = require('passport-jwt');
-const jwt = require('jsonwebtoken');
 const Crypto = require('crypto');
+const jwt = require('jsonwebtoken');
+
 
 class BreweryAuth {
     constructor(config) {
       this.repository = new InitializeDatabase(config).setRepository()
       this.authSecret = config.authSecret
+      this.authSecret2 = config.authSecret2
+    }
+
+
+    ValidateTokens(req) {
+      const token = req.headers['x-token'];
+
+      if(token){
+        try{
+          const { user } = jwt.verify(token, this.authSecret)
+          req.user = user
+        } catch(err) {
+          const refreshToken = req.headers['x-refresh-token'];
+          const newToken = refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2);
+
+          if(newToken.token && newToken.refreshToken){
+            let res = {}
+            res.set('x-token', newToken.token)
+            res.set('x-refresh-token', newToken.refreshToken);
+
+            return res
+          }
+          return req.user = newToken.user
+         }
+      }
     }
 
     register (body) {
-        const { email, username } = body;
-        const password = Crypto.createHash('SHA256').update(new Date().getTime() + username).digest('hex');
-          
+        const { email, username, password } = body;
+        const salt = 'testingngsaltlangto';
+        const hashedPassword = Crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
+        
         return new Promise((resolve, reject) => {
             this.repository.create({
                   email: email,
-                  password: password,
+                  password: hashedPassword,
                   username: username
               }).then(user => {
                 const response = {
-                  clientId: user.dataValues.id,
-                  password: user.dataValues.password
+                  clientId: user.dataValues.id
                 }
                 //must send an email for password reset link
                 resolve(response)
@@ -54,24 +81,29 @@ class BreweryAuth {
     }
 
     login (body) {
-        const { clientId, clientSecret } = body;
+        const { email, password } = body;
+        const salt = 'testingngsaltlangto';
+        const validate = Crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
 
           return new Promise((resolve, reject) => {
-            this.repository.findByPk(clientId).then(user => {
-              if(user.dataValues.password == clientSecret){
-                const token = jwt.sign({clientId: user.dataValues.id}, 'supersecretkey', {
-                  expiresIn: '1h'
-                })
-                const refreshToken = jwt.sign({accessToken: token}, 'supersecretkey', {
-                  expiresIn: '24h'
-                })
+
+            this.repository.findOne({ where: { email } }).then(user => {
+              const userData = user.dataValues
+              const userPassword = userData.password
+
+              if(!user) { throw new Error('Invalid login!') }
+
+              if( validate !== userPassword ) { throw new Error('Invalid login!') }
+
+              createTokens(user, this.authSecret, this.authSecret2 + password).then(tokens => {
+                const [token, refreshToken] = tokens
                 const response = {
                   clientId: user.dataValues.id,
                   token: token,
                   refreshToken: refreshToken
                 }
                 resolve(response);
-              }
+              })
             }).catch(err => reject(err));
           })
     }
@@ -115,8 +147,8 @@ class BreweryAuth {
       return passport.initialize();
     }
     
-    authenticate () {
-      {
+    JWTauthenticate () {
+    
         return [
           (req, res, next) => {
       
@@ -152,7 +184,7 @@ class BreweryAuth {
             })(req, res, next);
           }
         ];
-      };
+
   
     }
 }

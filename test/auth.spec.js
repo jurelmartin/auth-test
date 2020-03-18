@@ -33,18 +33,27 @@ describe("auth-test :: auth", () => {
             databaseName: 'postgres',
             username: 'postgres',
             password: 'root',
-            dialect: 'postgres',
-            host: 'localhost'
+dialect: 'postgres',
+            host: 'localhost',
+                        authSecret: 'supersecret',
+            autSecret2: 'supersecret2'
         }
         const user = {
-            username: 'jerico',
-            email: 'jestanislao@stratpoint.com'
+            username: 'jurelmartin',
+            email: 'jagustin@stratpoint.com',
+            password: '123456'
+        }
+        const loginCred = {
+            email: 'jagustin@stratpoint.com',
+            password: '123456'
         }
         it('output', () => {
-            // const brewery = new BreweryAuth(dbCredentials).register(user)
-            // brewery.then((result) => {
-            //     console.log(result)
-            // })
+            const brewery = new BreweryAuth(dbCredentials).login(loginCred)
+
+            brewery.then((result) => {
+
+                console.log(result)
+            })
             // console.log(brewery)
     
         })
