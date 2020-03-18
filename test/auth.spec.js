@@ -42,6 +42,9 @@ describe("auth-test :: auth", () => {
         }
         it('output', () => {
             // const brewery = new BreweryAuth(dbCredentials).register(user)
+            // brewery.then((result) => {
+            //     console.log(result)
+            // })
             // console.log(brewery)
     
         })
