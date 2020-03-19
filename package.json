@@ -29,6 +29,7 @@
     "sqlite3": "^4.1.1"
   },
   "scripts": {
+    "start": "node app,js",
     "test": "mocha --opts test/mocha.opts.test",
     "test:watch": "mocha --watch --opts test/mocha.opts.test"
   },

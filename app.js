@@ -45,13 +45,13 @@ app.use('/api', auth.JWTauthenticate(), async () => {
 app.listen(3000, async () => {
 
     //send email
-    console.log(await sendEmail({
-        to: 'jestanislao@stratpoint.com',
-        from: 'Brewery-auth',
-        subject: 'Sending with Twilio SendGrid is Fun',
-        text: 'and easy to do anywhere, even with Node.js',
-        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-      }));
+    // console.log(await sendEmail({
+    //     to: 'jestanislao@stratpoint.com',
+    //     from: 'Brewery-auth',
+    //     subject: 'Sending with Twilio SendGrid is Fun',
+    //     text: 'and easy to do anywhere, even with Node.js',
+    //     html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+    //   }));
     //send SMS pls wag gamitin ng madalas may limit lang siya
 
     // const text = 'Hello welcome to brewery'
@@ -68,7 +68,7 @@ app.listen(3000, async () => {
         phone: '1234567'
     });
 
-    console.log(register.details.id);
+    console.log(register.details);
 
     const login = await auth.login({
         clientId: register.details.id,
