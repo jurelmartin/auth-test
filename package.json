@@ -4,6 +4,7 @@
   "description": "brewery-auth-test-bed",
   "main": "auth.js",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "jsonwebtoken": "^8.5.1",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
