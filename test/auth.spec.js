@@ -37,7 +37,7 @@ describe("auth-test :: auth", () => {
             host: 'localhost',
             authSecret: 'supersecret',
             autSecret2: 'supersecret2',
-            attributes: ['email']
+            newAttrib: ['email']
         }
         const user = {
             username: 'teddy',

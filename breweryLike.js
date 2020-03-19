@@ -44,13 +44,13 @@ class BreweryAuth {
         const { email, username, password } = body;
         const salt = process.env.SALT;
         const hashedPassword = Crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
-        
         return new Promise((resolve, reject) => {
             this.repository.create({
                   email: email,
                   password: hashedPassword,
                   username: username
               }).then(user => {
+
                 const response = {
                   clientId: user.dataValues.id
                 }
