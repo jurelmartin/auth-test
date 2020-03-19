@@ -1,21 +1,21 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const sendSMS = require('./lib/sendSMS');
-const sendEmail = require('./lib/sendEmail');
+// const sendSMS = require('./lib/sendSMS');
+// const sendEmail = require('./lib/sendEmail');
 const breweryAuth = require('./breweryLike');
 
-const dbCredentials = {
-    databaseName: 'yourdatabase',
-    username: 'root',
+const dbConfigurations = {
+    databaseName: 'postgres',
+    username: 'postgres',
     password: 'root',
-    dialect: 'mysql',
+    dialect: 'postgres',
     host: 'localhost',
     authSecret: 'supersecret',
     autSecret2: 'supersecret2',
     newAttrib: ['email']
 }
-const auth = new breweryAuth(dbCredentials);
+const auth = new breweryAuth(dbConfigurations);
 
 app
 .use(cors())
