@@ -118,7 +118,7 @@ class BreweryAuth {
                 resolve(mfaCode);
               }
 
-              createTokens(user.id, this.authSecret, this.authSecret2 + user.id).then(tokens => {
+              createTokens(user.id, this.authSecret, this.authSecret2 + user.password).then(tokens => {
                 const [token, refreshToken] = tokens
                 const response = {
                   clientId: user.id,
