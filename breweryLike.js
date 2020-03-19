@@ -87,7 +87,7 @@ class BreweryAuth {
           return new Promise((resolve, reject) => {
 
             this.repository.findByPk(clientId, { raw:true }).then(user => {
-              const userPassword = user
+              const userPassword = user.password
 
               if(!user) { throw new Error('Invalid login!') }
 
