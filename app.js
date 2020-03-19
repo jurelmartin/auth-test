@@ -1,7 +1,10 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-breweryAuth = require('./breweryLike');
+const sendSMS = require('./lib/sendSMS');
+const sendEmail = require('./lib/sendEmail');
+const breweryAuth = require('./breweryLike');
+
 const dbCredentials = {
     databaseName: 'yourdatabase',
     username: 'root',
@@ -12,7 +15,7 @@ const dbCredentials = {
     autSecret2: 'supersecret2',
     newAttrib: ['email']
 }
-auth = new breweryAuth(dbCredentials);
+const auth = new breweryAuth(dbCredentials);
 
 app
 .use(cors())
@@ -41,6 +44,21 @@ app.use('/api', auth.JWTauthenticate(), async () => {
 
 app.listen(3000, async () => {
 
+    //send email
+    console.log(await sendEmail({
+        to: 'jestanislao@stratpoint.com',
+        from: 'Brewery-auth',
+        subject: 'Sending with Twilio SendGrid is Fun',
+        text: 'and easy to do anywhere, even with Node.js',
+        html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+      }));
+    //send SMS pls wag gamitin ng madalas may limit lang siya
+
+    // const text = 'Hello welcome to brewery'
+    // const from = 'Brewery-auth';
+    // const to = '+639498575069';
+
+    // console.log(await sendSMS(from, to, text));
      
 // login when user is registered by resource owner
     const register = await auth.register({
