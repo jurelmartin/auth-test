@@ -8,6 +8,7 @@ const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
 let signupCode, payloadId, forgotPasswordCode, mfaCode, loginId;
+const salt = 'awesomesalt';
 
 class BreweryAuth {
     constructor(config) {
@@ -42,7 +43,6 @@ class BreweryAuth {
 
     register (body) {
         const { email, username, password } = body;
-        const salt = process.env.SALT;
         const hashedPassword = Crypto.pbkdf2Sync(password, salt, 1000, 64, `sha512`).toString(`hex`);
         return new Promise((resolve, reject) => {
             this.repository.create({
@@ -82,7 +82,6 @@ class BreweryAuth {
 
     login (body) {
         const { clientId, clientSecret } = body;
-        const salt = process.env.SALT;
         const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
 
           return new Promise((resolve, reject) => {
