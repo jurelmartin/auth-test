@@ -4,6 +4,7 @@ const cors = require('cors');
 const sendSMS = require('./lib/sendSMS');
 const sendEmail = require('./lib/sendEmail');
 const breweryAuth = require('./breweryLike');
+const {generateCode, verifyCode} = require('./lib/codeFactory')
 
 const dbCredentials = {
     databaseName: 'yourdatabase',
@@ -44,6 +45,7 @@ app.use('/api', auth.JWTauthenticate(), async () => {
 
 app.listen(3000, async () => {
 
+
     //send email
     // console.log(await sendEmail({
     //     to: 'jestanislao@stratpoint.com',
@@ -67,6 +69,8 @@ app.listen(3000, async () => {
         username: 'jecusername',
         phone: '1234567'
     });
+
+
 
     console.log(register.details);
 
@@ -98,7 +102,7 @@ app.listen(3000, async () => {
 
     const confirmNoMFA = await auth.signupConfirm({
         clientId: signupNoMFA.clientId,
-        confirmationCode: signupNoMFA.confirmationCode.code,
+        confirmationCode: signupNoMFA.confirmationCode,
     });
 
     console.log(confirmNoMFA);
@@ -124,7 +128,7 @@ app.listen(3000, async () => {
     
     const confirmPasswordReset = await auth.passwordReset({
         clientId: confirmNoMFA2.id,
-        confirmationCode: forgotPassword.details.code,
+        confirmationCode: forgotPassword.confirmationCode,
         newPassword: 'newPassword'
     });
 
@@ -150,7 +154,7 @@ app.listen(3000, async () => {
 
     const confirmMFA = await auth.signupConfirm({
         clientId: signupMFA.clientId,
-        confirmationCode: signupMFA.confirmationCode.code,
+        confirmationCode: signupMFA.confirmationCode,
     });
 
     console.log(confirmMFA);
