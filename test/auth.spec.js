@@ -37,7 +37,7 @@ describe("auth-test :: auth", () => {
             host: 'localhost',
             authSecret: 'supersecret',
             autSecret2: 'supersecret2',
-            attributes: ['email']
+            newAttrib: ['email']
         }
         const user = {
             username: 'teddy',
@@ -45,11 +45,13 @@ describe("auth-test :: auth", () => {
             password: '696969'
         }
         const loginCred = {
-            email: 'jagustin@stratpoint.com',
-            password: '123456'
+            clientId: 'b7225930-2260-4343-84f7-cd8e239d7c47',
+            clientSecret: '696969'
         }
         it('output', () => {
-            const brewery = new BreweryAuth(dbConfigurations).register(user)
+            const brewery = new BreweryAuth(dbConfigurations).login(loginCred)
+            // const brewery = new BreweryAuth(dbConfigurations).register(user)
+
 
             brewery.then((result) => {
 

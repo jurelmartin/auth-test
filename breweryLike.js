@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
 let signupCode, payloadId, forgotPasswordCode, mfaCode, loginId;
+const salt = 'awesomesalt';
 
 class BreweryAuth {
     constructor(config) {
@@ -19,26 +20,32 @@ class BreweryAuth {
 
 
     ValidateTokens(req) {
-      const token = req.headers['x-token'];
-
+      const token = req.get('x-token');
       if(token){
         try{
-          const { user } = jwt.verify(token, this.authSecret)
-          req.user = user
+          const { clientId } = jwt.verify(token, this.authSecret)
+          req.clientId = clientId
         } catch(err) {
-          const refreshToken = req.headers['x-refresh-token'];
-          const newToken = refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2);
+          const refreshToken = req.get('x-refresh-token');
+          refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2).then(result => {
+            const { clientId, token, refreshToken } = result
+            
+            console.log('AToken: ' + token)
+            console.log('RToken: ' + refreshToken)
 
-          if(newToken.token && newToken.refreshToken){
-            let res = {}
-            res.set('x-token', newToken.token)
-            res.set('x-refresh-token', newToken.refreshToken);
-
-            return res
-          }
-          return req.user = newToken.user
-         }
+              if(token && refreshToken){
+                return res.status(401).json({
+                  status: 401,
+                  message: 'Token Expired, Please renew',
+                  Tokens: {
+                    AccesToken: token,
+                    RefreshToken: refreshToken
+                  }});
+              }
+          })
+        }
       }
+      next()
     }
 
     register (body) {
@@ -85,7 +92,6 @@ class BreweryAuth {
 
     login (body) {
         const { clientId, clientSecret } = body;
-        const salt = process.env.SALT;
         const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
 
           return new Promise((resolve, reject) => {
