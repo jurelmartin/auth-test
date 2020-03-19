@@ -1,6 +1,7 @@
 // FOR NON-SERVERLESS
 const InitializeDatabase = require('./lib/InitializeDatabase');
 const {createTokens, refreshTokens} = require('./lib/TokenCreations');
+const generateCode = require('./lib/codeGenerator');
 const passport = require('passport');
 const { ExtractJwt, Strategy } = require('passport-jwt');
 const Crypto = require('crypto');
@@ -67,7 +68,7 @@ class BreweryAuth {
             this.repository.create(body , {raw: true}).then(user => {
               signupCode = {
                 clientId: user.id,
-                code: Math.random()
+                code: generateCode()
               }
                 const response = {
                   message: 'success. use signupConfirm function',
@@ -106,7 +107,7 @@ class BreweryAuth {
               if (user.MFA === 1){
                 mfaCode = {
                   clientId: user.id,
-                  code: Math.random()
+                  code: generateCode()
                 }
                 resolve(mfaCode);
               }
@@ -186,7 +187,7 @@ class BreweryAuth {
         this.repository.findByPk(clientId).then(user => {
           signupCode = {
             clientId: clientId,
-            code: Math.random()
+            code: generateCode()
           }
           // sends new confirmation code, through sms or email,
           const response = {
@@ -205,7 +206,7 @@ class BreweryAuth {
         this.repository.findByPk(clientId, {raw: true}).then(user => {
           forgotPasswordCode = {
             clientId: user.id,
-            code: Math.random()
+            code: generateCode()
           }
 
           const response = {

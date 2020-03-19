@@ -19,6 +19,7 @@ app
 .use(auth.initialize());
 
 app.use('/api', auth.JWTauthenticate(), async () => {
+     
     const profile = await auth.profile();
     console.log(profile);
     const mfaData = await auth.getMfa();
@@ -39,6 +40,8 @@ app.use('/api', auth.JWTauthenticate(), async () => {
 })
 
 app.listen(3000, async () => {
+
+     
 // login when user is registered by resource owner
     const register = await auth.register({
         email: 'jec@email.com',
