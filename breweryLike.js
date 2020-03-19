@@ -9,8 +9,7 @@ const {generateCode, verifyCode} = require('./lib/codeFactory')
 require("dotenv").config();
 
 
-let signupCode, payloadId, forgotPasswordCode, mfaCode, loginId;
-const salt = 'awesomesalt';
+let payloadId, loginId;
 
 class BreweryAuth {
     constructor(config) {
@@ -109,11 +108,11 @@ class BreweryAuth {
                 resolve(response);
               }
               if (user.MFA === 1){
-                mfaCode = {
+                const response = {
                   clientId: user.id,
                   code: generateCode(user.id, 'mfa')
                 }
-                resolve(mfaCode);
+                resolve(response);
               }
 
               createTokens(user.id, this.authSecret, this.authSecret2 + user.id).then(tokens => {
@@ -206,10 +205,6 @@ class BreweryAuth {
 
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId, {raw: true}).then(user => {
-          forgotPasswordCode = {
-            clientId: user.id,
-            code: generateCode(user.id, 'password')
-          }
 
           const response = {
             message: 'success. use passwordReset function',
