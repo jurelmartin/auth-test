@@ -5,6 +5,8 @@ const sendSMS = require('./lib/sendSMS');
 const sendEmail = require('./lib/sendEmail');
 const breweryAuth = require('./breweryLike');
 const {generateCode, verifyCode} = require('./lib/codeFactory')
+const session = require('express-session');
+const cookieParser = require('cookie-parser');
 
 const dbCredentials = {
     databaseName: 'yourdatabase',
@@ -22,8 +24,64 @@ app
 .use(cors())
 .use(auth.initialize());
 
-app.use('/api', auth.JWTauthenticate(), async () => {
-     
+app.use(cookieParser());
+
+// app.use(session({
+//     key: 'user_sid',
+//     secret: 'somerandonstuffs',
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//         expires: 1000
+//     }
+// }));
+
+// app.use(session({
+//     key: 'user_sid',
+//     resave: false,
+//     saveUninitialized: false,
+//     secret : 'keyboard cat',
+//     cookie : {
+//       maxAge : 1000
+//     }
+// }));
+
+// app.use('/', (req, res, next) => {
+//     // res.clearCookie('user_sid');
+//     // add(req.session);
+//     setTimeout(() => console.log(req.session['jericomfa'], req.cookies.user_sid), 3000);
+// });
+
+app.use('/api', auth.JWTauthenticate(), (req, res, next) => {
+    const execute = async (id) => {
+
+
+        const profile = await auth.profile(id);
+        console.log(profile);
+        const mfaData = await auth.getMfa(id);
+        console.log(mfaData);
+        const setMfa = await auth.setMfa(id, {
+            mfa: false
+        });
+        console.log(setMfa);
+        const updated = await auth.profileEdit(id, {
+            username: 'jericooo11'
+        });
+        console.log(updated);
+
+        const newPassword = await auth.passwordChange(id, {
+            oldPassword: 'jecpassword', 
+            newPassword: Math.random().toString()
+        });
+        console.log(newPassword);
+    }
+    
+    execute(req.userId);
+})
+
+app.use('/api2', async () => {
+
+
     const profile = await auth.profile();
     console.log(profile);
     const mfaData = await auth.getMfa();
@@ -44,9 +102,7 @@ app.use('/api', auth.JWTauthenticate(), async () => {
 })
 
 app.listen(3000, async () => {
-
-
-    //send email
+    // send email
     // console.log(await sendEmail({
     //     to: 'jestanislao@stratpoint.com',
     //     from: 'Brewery-auth',
@@ -54,6 +110,7 @@ app.listen(3000, async () => {
     //     text: 'and easy to do anywhere, even with Node.js',
     //     html: '<strong>and easy to do anywhere, even with Node.js</strong>',
     //   }));
+
     //send SMS pls wag gamitin ng madalas may limit lang siya
 
     // const text = 'Hello welcome to brewery'
