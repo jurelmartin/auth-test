@@ -92,9 +92,7 @@ class BreweryAuth {
         return new Promise((resolve, reject) => {
 
           this.repository.findByPk(clientId, { raw:true }).then(user => {
-
             if(!user) { throw new Error('Invalid login!') }
-
             if(validate !== user.password) { throw new Error('Invalid login!') }
 
               if(user.registered === 1){
@@ -111,7 +109,6 @@ class BreweryAuth {
                   code: generateCode(user.id, 'mfa')
                 }
                 resolve(response);
-
               }
 
               createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
@@ -122,13 +119,8 @@ class BreweryAuth {
                   refreshToken: refreshToken
                 }
                 resolve(response);
-              
             }).catch(err => reject(err));
-
-
           })
-
-
         })
     }
 
@@ -344,7 +336,7 @@ class BreweryAuth {
            * clear tokens in the back-end ONLY
            * still need to clear on the front-end
            */
-          
+
           req.headers['authorization'] = ''
           req.headers['x-token'] = ''
           req.headers['x-refresh-token'] = ''
