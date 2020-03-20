@@ -7,7 +7,7 @@ const Crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const {generateCode, verifyCode} = require('./lib/codeFactory')
 require("dotenv").config();
-
+const salt = 'superduperhardsalt'
 
 let payloadId, loginSession = {};
 
@@ -18,38 +18,37 @@ class BreweryAuth {
       this.authSecret2 = config.authSecret2
     }
 
-
-    ValidateTokens(req) {
+    
+    async _validateTokens(req) {
       const token = req.get('x-token');
+      let response;
       if(token){
         try{
-          const { clientId } = jwt.verify(token, this.authSecret)
-          req.clientId = clientId
+          const { userId } = jwt.verify(token, this.authSecret)
+
+          req.clientId = userId
         } catch(err) {
           const refreshToken = req.get('x-refresh-token');
-          refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2).then(result => {
-            const { clientId, token, refreshToken } = result
-            
-            console.log('AToken: ' + token)
-            console.log('RToken: ' + refreshToken)
 
-              if(token && refreshToken){
-                return res.status(401).json({
-                  status: 401,
-                  message: 'Token Expired, Please renew',
-                  Tokens: {
-                    AccesToken: token,
-                    RefreshToken: refreshToken
-                  }});
+          let result = await refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2);
+          const { clientId, token: token_2, refreshToken: refreshToken_1 } = result;
+          if (token_2 && refreshToken_1) {
+            response = {
+              status: 401,
+              message: 'Token Expired, Please renew',
+              Tokens: {
+                AccesToken: token_2,
+                RefreshToken: refreshToken_1
               }
-          })
+            };
+          }
+          return response;
         }
       }
-      next()
     }
 
     register (body) {
-        const salt = process.env.SALT;
+        // const salt = process.env.SALT;
         body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
         body.MFA = 0;
         body.registered = 1;
@@ -69,7 +68,7 @@ class BreweryAuth {
 
     signup (body) {
           body.registered = 0;
-          const salt = process.env.SALT;
+          // const salt = process.env.SALT;
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
           return new Promise((resolve, reject) => {
             this.repository.create(body , {raw: true}).then(user => {
@@ -87,17 +86,14 @@ class BreweryAuth {
     }
 
     login (body) {
-        const { clientId, clientSecret } = body;
-        const salt = process.env.SALT;
-        const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
+      const { clientId, clientSecret } = body;
+      const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
 
-          return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
-            this.repository.findByPk(clientId, { raw:true }).then(user => {
-
-              if(!user) { throw new Error('Invalid login!') }
-
-              if(validate !== user.password) { throw new Error('Invalid login!') }
+          this.repository.findByPk(clientId, { raw:true }).then(user => {
+            if(!user) { throw new Error('Invalid login!') }
+            if(validate !== user.password) { throw new Error('Invalid login!') }
 
               if(user.registered === 1){
 
@@ -120,7 +116,7 @@ class BreweryAuth {
                 resolve(response);
               }
 
-              createTokens(user.id, this.authSecret, this.authSecret2 + user.id).then(tokens => {
+              createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
                 const [token, refreshToken] = tokens
                 const response = {
                   clientId: user.id,
@@ -128,14 +124,14 @@ class BreweryAuth {
                   refreshToken: refreshToken
                 }
                 resolve(response);
-              })
             }).catch(err => reject(err));
           })
+        })
     }
 
     loginNewPasswordRequired (body) {
       const { clientId, newPassword } = body;
-      const salt = process.env.SALT;
+      // const salt = process.env.SALT;
       const hashedPassword = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
         if(!loginSession[clientId]){
@@ -230,7 +226,7 @@ class BreweryAuth {
 
     passwordReset (body) {
       const { clientId, confirmationCode, newPassword } = body;
-      const salt = process.env.SALT;
+      // const salt = process.env.SALT;
       const newPasswordHash = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
 
       return new Promise ((resolve, reject) => {
@@ -277,7 +273,7 @@ class BreweryAuth {
 
     passwordChange (body)  {
       const { oldPassword, newPassword } = body;
-      const salt = process.env.SALT;
+      // const salt = process.env.SALT;
       const newPasswordHash = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       const oldPasswordHash = Crypto.pbkdf2Sync(oldPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
@@ -339,6 +335,29 @@ class BreweryAuth {
       })
     }
 
+    logout(req, res) {
+      const getAccessToken = req.headers['authorization']
+      const accessToken = req.headers['x-token'];
+      const refreshToken = req.headers['x-refresh-token'];
+
+
+        if(getAccessToken && accessToken && refreshToken){
+          /* 
+           * clear tokens in the back-end ONLY
+           * still need to clear on the front-end
+           */
+
+          req.headers['authorization'] = ''
+          req.headers['x-token'] = ''
+          req.headers['x-refresh-token'] = ''
+
+          return res.json({
+            status: 401,
+            message: 'Successfully logged out!'
+          })
+        }
+    }
+
 
    /*
     * FOR PASSPORT AUTHENTICATION
@@ -350,6 +369,7 @@ class BreweryAuth {
     JWTauthenticate () {
       const repository = this.repository
       const configSecret = this.authSecret
+
         return [
           (req, res, next) => {
       
@@ -358,7 +378,8 @@ class BreweryAuth {
             jwtOptions.secretOrKey = configSecret;  
             
             passport.use(new Strategy(jwtOptions, (jwt_payload, done) => {
-              repository.findByPk(jwt_payload.user, {raw: true})
+
+              repository.findByPk(jwt_payload.userId, {raw: true})
                 .then((user) => {
                   done(null, user);
                 })
@@ -375,18 +396,15 @@ class BreweryAuth {
         
             return passport.authenticate('jwt', (err, user, info)=> {
               if(!user){
-                return res.status(401).json({
-                  status: 401,
-                  message: 'Not Authenticated'
-                });
+                this._validateTokens(req).then(result => {
+                  return res.json(result)
+                })
               }
               payloadId = user.id;
               return next();
             })(req, res, next);
           }
         ];
-
-  
     }
 }
 module.exports = BreweryAuth;
