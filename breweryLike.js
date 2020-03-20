@@ -9,7 +9,7 @@ const {generateCode, verifyCode} = require('./lib/codeFactory')
 require("dotenv").config();
 const salt = 'superduperhardsalt'
 
-let payloadId, loginSession = {};
+let loginSession = {};
 
 class BreweryAuth {
     constructor(config) {
