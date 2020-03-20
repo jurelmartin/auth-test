@@ -111,20 +111,24 @@ class BreweryAuth {
                   code: generateCode(user.id, 'mfa')
                 }
                 resolve(response);
+
               }
-              resolve(mfaCode);
+
+              createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
+                const [token, refreshToken] = tokens
+                const response = {
+                  clientId: user.id,
+                  token: token,
+                  refreshToken: refreshToken
+                }
+                resolve(response);
+              
+            }).catch(err => reject(err));
+
+
           })
 
-            createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
-              const [token, refreshToken] = tokens
-              const response = {
-                clientId: user.id,
-                token: token,
-                refreshToken: refreshToken
-              }
-              resolve(response);
-            
-          }).catch(err => reject(err));
+
         })
     }
 

@@ -46,7 +46,7 @@ describe("auth-test :: auth", () => {
             phone: '0998123'
         }
         const loginCred = {
-            clientId: '03b18ea0-67b9-4d3a-b33b-23c2b03c78e5',
+            clientId: 'a7c6e0b5-bdc8-403e-b9a9-f22b81035b24',
             clientSecret: '123456'
         }
         it('output', () => {
