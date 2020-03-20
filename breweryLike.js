@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken');
 const {generateCode, verifyCode} = require('./lib/codeFactory')
 require("dotenv").config();
 const salt = 'superduperhardsalt'
+const Validate = require('./lib/utils/validations')
+
 
 let payloadId, loginSession = {};
 
@@ -54,6 +56,12 @@ class BreweryAuth {
         body.registered = 1;
         
         return new Promise((resolve, reject) => {
+            const checkFirst = new Validate(body).isValid()
+            if(checkFirst) {
+              const response = checkFirst
+              resolve(response)
+            }
+
             this.repository.create(body, {raw: true}).then(user => {
                 const response = {
                   message: 'Registered',
@@ -71,6 +79,12 @@ class BreweryAuth {
           // const salt = process.env.SALT;
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
           return new Promise((resolve, reject) => {
+            const checkFirst = new Validate(body).isValid()
+            if(checkFirst) {
+              const response = checkFirst
+              resolve(response)
+            }
+
             this.repository.create(body , {raw: true}).then(user => {
                 const response = {
                   message: 'success. use signupConfirm function',

@@ -42,16 +42,27 @@ describe("auth-test :: auth", () => {
         const user = {
             email: 'jagustin@stratpoint.com',
             password: '123456',
-            username: 'jecusername',
-            phone: '0998123'
+            username: 'jurelmartin',
+            phone: '+639954928364'
         }
         const loginCred = {
             clientId: 'a7c6e0b5-bdc8-403e-b9a9-f22b81035b24',
             clientSecret: '123456'
         }
+        const forSignup = {
+            email: 'jec@email.com',
+            password: 'jecpassword',
+            username: 'jecusername',
+            phone: '09954928364',
+            MFA: 1
+        }
+    
+
+
         it('output', () => {
-            const brewery = new BreweryAuth(dbConfigurations).login(loginCred)
-            // const brewery = new BreweryAuth(dbConfigurations).register(user)
+            // const brewery = new BreweryAuth(dbConfigurations).login(loginCred)
+            const brewery = new BreweryAuth(dbConfigurations).signup(forSignup)
+
 
 
             brewery.then((result) => {
