@@ -9,7 +9,7 @@ const {generateCode, verifyCode} = require('./lib/codeFactory')
 require("dotenv").config();
 
 
-let payloadId, loginId;
+let payloadId, loginSession = {};
 
 class BreweryAuth {
     constructor(config) {
@@ -100,15 +100,20 @@ class BreweryAuth {
               if(validate !== user.password) { throw new Error('Invalid login!') }
 
               if(user.registered === 1){
-                loginId = user.id;
+
+                loginSession[user.id] = true;
+                
                 const response = {
                   clientId: user.id,
                   message: 'Use loginNewPasswordRequired function'
+                
                 };
                 resolve(response);
               }
               if (user.MFA === 1){
+                loginSession[user.id] = true;
                 const response = {
+                  message: 'sucess. use loginMfa function' ,
                   clientId: user.id,
                   code: generateCode(user.id, 'mfa')
                 }
@@ -133,7 +138,7 @@ class BreweryAuth {
       const salt = process.env.SALT;
       const hashedPassword = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
-        if(loginId !== clientId){
+        if(!loginSession[clientId]){
           reject(null);
         }
         this.repository.findByPk(clientId).then(user => {
@@ -146,6 +151,7 @@ class BreweryAuth {
               token: token,
               refreshToken: refreshToken
             }
+            loginSession[clientId] = null;
             resolve(response);
           })
         }).catch(err => resolve(err));
@@ -155,6 +161,9 @@ class BreweryAuth {
     loginMfa (body) {
       const { clientId, confirmationCode } = body
       return new Promise((resolve, reject) => {
+        if(!loginSession[clientId]){
+          reject(null);
+        }
         const isValid = verifyCode(clientId, confirmationCode, 'mfa');
         if(!isValid){
           reject('invalid code');
@@ -166,6 +175,7 @@ class BreweryAuth {
               token: token,
               refreshToken: refreshToken
             }
+            loginSession[clientId] = null;
             resolve(response);
           })
       })
