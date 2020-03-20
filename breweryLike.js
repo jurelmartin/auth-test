@@ -333,6 +333,29 @@ class BreweryAuth {
       })
     }
 
+    logout(req, res) {
+      const getAccessToken = req.headers['authorization']
+      const accessToken = req.headers['x-token'];
+      const refreshToken = req.headers['x-refresh-token'];
+
+
+        if(getAccessToken && accessToken && refreshToken){
+          /* 
+           * clear tokens in the back-end ONLY
+           * still need to clear on the front-end
+           */
+          
+          req.headers['authorization'] = ''
+          req.headers['x-token'] = ''
+          req.headers['x-refresh-token'] = ''
+
+          return res.json({
+            status: 401,
+            message: 'Successfully logged out!'
+          })
+        }
+    }
+
 
    /*
     * FOR PASSPORT AUTHENTICATION
