@@ -61,12 +61,10 @@ describe("auth-test :: auth", () => {
 
         it('output', () => {
             // const brewery = new BreweryAuth(dbConfigurations).login(loginCred)
-            const brewery = new BreweryAuth(dbConfigurations).signup(forSignup)
-
-
-
+            // const brewery = new BreweryAuth(dbConfigurations).signup(forSignup)
+            const brewery = new BreweryAuth(dbConfigurations).register(user)
             brewery.then((result) => {
-
+                
                 console.log(result)
             })
             // console.log(brewery)

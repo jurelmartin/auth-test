@@ -58,8 +58,7 @@ class BreweryAuth {
         return new Promise((resolve, reject) => {
             const checkFirst = new Validate(body).isValid()
             if(checkFirst) {
-              const response = checkFirst
-              resolve(response)
+              return resolve(checkFirst) 
             }
 
             this.repository.create(body, {raw: true}).then(user => {
@@ -78,11 +77,11 @@ class BreweryAuth {
           body.registered = 0;
           // const salt = process.env.SALT;
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
+          
           return new Promise((resolve, reject) => {
             const checkFirst = new Validate(body).isValid()
             if(checkFirst) {
-              const response = checkFirst
-              resolve(response)
+              return resolve(checkFirst) 
             }
 
             this.repository.create(body , {raw: true}).then(user => {
