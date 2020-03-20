@@ -18,34 +18,33 @@ class BreweryAuth {
       this.authSecret2 = config.authSecret2
     }
 
-
-    ValidateTokens(req) {
+    
+    async _validateTokens(req) {
       const token = req.get('x-token');
+      let response;
       if(token){
         try{
-          const { clientId } = jwt.verify(token, this.authSecret)
-          req.clientId = clientId
+          const { userId } = jwt.verify(token, this.authSecret)
+
+          req.clientId = userId
         } catch(err) {
           const refreshToken = req.get('x-refresh-token');
-          refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2).then(result => {
-            const { clientId, token, refreshToken } = result
-            
-            console.log('AToken: ' + token)
-            console.log('RToken: ' + refreshToken)
 
-              if(token && refreshToken){
-                return res.status(401).json({
-                  status: 401,
-                  message: 'Token Expired, Please renew',
-                  Tokens: {
-                    AccesToken: token,
-                    RefreshToken: refreshToken
-                  }});
+          let result = await refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2);
+          const { clientId, token: token_2, refreshToken: refreshToken_1 } = result;
+          if (token_2 && refreshToken_1) {
+            response = {
+              status: 401,
+              message: 'Token Expired, Please renew',
+              Tokens: {
+                AccesToken: token_2,
+                RefreshToken: refreshToken_1
               }
-          })
+            };
+          }
+          return response;
         }
       }
-      next()
     }
 
     register (body) {
@@ -91,45 +90,45 @@ class BreweryAuth {
     }
 
     login (body) {
-        const { clientId, clientSecret } = body;
-        const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
+      const { clientId, clientSecret } = body;
+      const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
 
-          return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
 
-            this.repository.findByPk(clientId, { raw:true }).then(user => {
+          this.repository.findByPk(clientId, { raw:true }).then(user => {
 
-              if(!user) { throw new Error('Invalid login!') }
+            if(!user) { throw new Error('Invalid login!') }
 
-              if(validate !== user.password) { throw new Error('Invalid login!') }
+            if(validate !== user.password) { throw new Error('Invalid login!') }
 
-              if(user.registered === 1){
-                loginId = user.id;
-                const response = {
-                  clientId: user.id,
-                  message: 'Use loginNewPasswordRequired function'
-                };
-                resolve(response);
+            if(user.registered === 1){
+              loginId = user.id;
+              const response = {
+                clientId: user.id,
+                message: 'Use loginNewPasswordRequired function'
+              };
+              resolve(response);
+            }
+            if (user.MFA === 1){
+              mfaCode = {
+                clientId: user.id,
+                code: generateCode()
               }
-              if (user.MFA === 1){
-                mfaCode = {
-                  clientId: user.id,
-                  code: generateCode()
-                }
-                resolve(mfaCode);
-              }
+              resolve(mfaCode);
+            }
 
-              createTokens(user.id, this.authSecret, this.authSecret2 + user.password).then(tokens => {
-                const [token, refreshToken] = tokens
-                const response = {
-                  clientId: user.id,
-                  token: token,
-                  refreshToken: refreshToken
-                }
-                resolve(response);
-              })
-            }).catch(err => reject(err));
-          })
-    }
+            createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
+              const [token, refreshToken] = tokens
+              const response = {
+                clientId: user.id,
+                token: token,
+                refreshToken: refreshToken
+              }
+              resolve(response);
+            })
+          }).catch(err => reject(err));
+        })
+  }
 
     loginNewPasswordRequired (body) {
       const { clientId, newPassword } = body;
@@ -349,6 +348,7 @@ class BreweryAuth {
     JWTauthenticate () {
       const repository = this.repository
       const configSecret = this.authSecret
+
         return [
           (req, res, next) => {
       
@@ -357,7 +357,8 @@ class BreweryAuth {
             jwtOptions.secretOrKey = configSecret;  
             
             passport.use(new Strategy(jwtOptions, (jwt_payload, done) => {
-              repository.findByPk(jwt_payload.user, {raw: true})
+
+              repository.findByPk(jwt_payload.userId, {raw: true})
                 .then((user) => {
                   done(null, user);
                 })
@@ -374,18 +375,15 @@ class BreweryAuth {
         
             return passport.authenticate('jwt', (err, user, info)=> {
               if(!user){
-                return res.status(401).json({
-                  status: 401,
-                  message: 'Not Authenticated'
-                });
+                this._validateTokens(req).then(result => {
+                  return res.json(result)
+                })
               }
               payloadId = user.id;
               return next();
             })(req, res, next);
           }
         ];
-
-  
     }
 }
 module.exports = BreweryAuth;

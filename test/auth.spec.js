@@ -40,13 +40,14 @@ describe("auth-test :: auth", () => {
             newAttrib: ['email']
         }
         const user = {
-            username: 'teddy',
-            email: 'teddy@stratpoint.com',
-            password: '696969'
+            email: 'jagustin@stratpoint.com',
+            password: '123456',
+            username: 'jecusername',
+            phone: '0998123'
         }
         const loginCred = {
-            clientId: 'b7225930-2260-4343-84f7-cd8e239d7c47',
-            clientSecret: '696969'
+            clientId: '03b18ea0-67b9-4d3a-b33b-23c2b03c78e5',
+            clientSecret: '123456'
         }
         it('output', () => {
             const brewery = new BreweryAuth(dbConfigurations).login(loginCred)
