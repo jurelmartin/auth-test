@@ -7,7 +7,7 @@ const Crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const {generateCode, verifyCode} = require('./lib/codeFactory')
 require("dotenv").config();
-
+const salt = 'superduperhardsalt'
 
 let payloadId, loginId;
 
@@ -48,7 +48,7 @@ class BreweryAuth {
     }
 
     register (body) {
-        const salt = process.env.SALT;
+        // const salt = process.env.SALT;
         body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
         body.MFA = 0;
         body.registered = 1;
@@ -68,7 +68,7 @@ class BreweryAuth {
 
     signup (body) {
           body.registered = 0;
-          const salt = process.env.SALT;
+          // const salt = process.env.SALT;
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
           return new Promise((resolve, reject) => {
             this.repository.create(body , {raw: true}).then(user => {
@@ -130,7 +130,7 @@ class BreweryAuth {
 
     loginNewPasswordRequired (body) {
       const { clientId, newPassword } = body;
-      const salt = process.env.SALT;
+      // const salt = process.env.SALT;
       const hashedPassword = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
         if(loginId !== clientId){
@@ -220,7 +220,7 @@ class BreweryAuth {
 
     passwordReset (body) {
       const { clientId, confirmationCode, newPassword } = body;
-      const salt = process.env.SALT;
+      // const salt = process.env.SALT;
       const newPasswordHash = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
 
       return new Promise ((resolve, reject) => {
@@ -267,7 +267,7 @@ class BreweryAuth {
 
     passwordChange (body)  {
       const { oldPassword, newPassword } = body;
-      const salt = process.env.SALT;
+      // const salt = process.env.SALT;
       const newPasswordHash = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       const oldPasswordHash = Crypto.pbkdf2Sync(oldPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
