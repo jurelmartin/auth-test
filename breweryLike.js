@@ -1,15 +1,15 @@
 // FOR NON-SERVERLESS
 const InitializeDatabase = require('./lib/InitializeDatabase');
 const {createTokens, refreshTokens} = require('./lib/TokenCreations');
-const generateCode = require('./lib/codeGenerator');
 const passport = require('passport');
 const { ExtractJwt, Strategy } = require('passport-jwt');
 const Crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const {generateCode, verifyCode} = require('./lib/codeFactory')
 require("dotenv").config();
 
-let signupCode, payloadId, forgotPasswordCode, mfaCode, loginId;
-const salt = 'awesomesalt';
+
+let payloadId, loginId;
 
 class BreweryAuth {
     constructor(config) {
@@ -48,7 +48,7 @@ class BreweryAuth {
     }
 
     register (body) {
-        // const salt = process.env.SALT;
+        const salt = process.env.SALT;
         body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
         body.MFA = 0;
         body.registered = 1;
@@ -68,19 +68,15 @@ class BreweryAuth {
 
     signup (body) {
           body.registered = 0;
-          // const salt = process.env.SALT;
+          const salt = process.env.SALT;
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
           return new Promise((resolve, reject) => {
             this.repository.create(body , {raw: true}).then(user => {
-              signupCode = {
-                clientId: user.id,
-                code: generateCode()
-              }
                 const response = {
                   message: 'success. use signupConfirm function',
                   clientId: user.id,
                   password: user.password,
-                  confirmationCode: signupCode
+                  confirmationCode: generateCode(user.id, 'signup')
                 }
               // must send a confirmation code either email, or mobile
                 resolve(response)
@@ -101,21 +97,23 @@ class BreweryAuth {
 
             if(validate !== user.password) { throw new Error('Invalid login!') }
 
-            if(user.registered === 1){
-              loginId = user.id;
-              const response = {
-                clientId: user.id,
-                message: 'Use loginNewPasswordRequired function'
-              };
-              resolve(response);
-            }
-            if (user.MFA === 1){
-              mfaCode = {
-                clientId: user.id,
-                code: generateCode()
+              if(user.registered === 1){
+                loginId = user.id;
+                const response = {
+                  clientId: user.id,
+                  message: 'Use loginNewPasswordRequired function'
+                };
+                resolve(response);
+              }
+              if (user.MFA === 1){
+                const response = {
+                  clientId: user.id,
+                  code: generateCode(user.id, 'mfa')
+                }
+                resolve(response);
               }
               resolve(mfaCode);
-            }
+          })
 
             createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
               const [token, refreshToken] = tokens
@@ -125,14 +123,14 @@ class BreweryAuth {
                 refreshToken: refreshToken
               }
               resolve(response);
-            })
+            
           }).catch(err => reject(err));
         })
-  }
+    }
 
     loginNewPasswordRequired (body) {
       const { clientId, newPassword } = body;
-      // const salt = process.env.SALT;
+      const salt = process.env.SALT;
       const hashedPassword = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
         if(loginId !== clientId){
@@ -157,7 +155,8 @@ class BreweryAuth {
     loginMfa (body) {
       const { clientId, confirmationCode } = body
       return new Promise((resolve, reject) => {
-        if(mfaCode.clientId !== clientId && mfaCode.code !== confirmationCode){
+        const isValid = verifyCode(clientId, confirmationCode, 'mfa');
+        if(!isValid){
           reject('invalid code');
         }
           createTokens(clientId, this.authSecret, this.authSecret2 + clientId).then(tokens => {
@@ -176,8 +175,9 @@ class BreweryAuth {
         const { clientId, confirmationCode } = body;
 
         return new Promise((resolve, reject) => {
-          if (signupCode.clientId !== clientId || signupCode.code !== confirmationCode){
-            reject(null);
+          const isValid = verifyCode(clientId, confirmationCode, 'signup');
+          if(!isValid){
+            reject('code expired/invalid');
           }
           this.repository.findByPk(clientId, {raw: true}).then(user => {
             resolve(user);
@@ -189,15 +189,11 @@ class BreweryAuth {
       const { clientId } = body;
 
       return new Promise((resolve, reject) => {
-        this.repository.findByPk(clientId).then(user => {
-          signupCode = {
-            clientId: clientId,
-            code: generateCode()
-          }
+        this.repository.findByPk(clientId, {raw: true}).then(user => {
           // sends new confirmation code, through sms or email,
           const response = {
-            clientId: signupCode.clientId,
-            confirmationCode: signupCode.code
+            clientId: user.id,
+            confirmationCode: generateCode(user.id, 'signup')
           }
           resolve(response);
         }).catch(err => reject(err.message));
@@ -209,14 +205,10 @@ class BreweryAuth {
 
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId, {raw: true}).then(user => {
-          forgotPasswordCode = {
-            clientId: user.id,
-            code: generateCode()
-          }
 
           const response = {
             message: 'success. use passwordReset function',
-            details: forgotPasswordCode
+            confirmationCode: generateCode(clientId, 'password')
           }
     
           // must send an email for password link
@@ -228,21 +220,21 @@ class BreweryAuth {
 
     passwordReset (body) {
       const { clientId, confirmationCode, newPassword } = body;
-      // const salt = process.env.SALT;
+      const salt = process.env.SALT;
       const newPasswordHash = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
 
       return new Promise ((resolve, reject) => {
         this.repository.findByPk(clientId).then( user => {
-          if (user.dataValues.id === forgotPasswordCode.clientId && confirmationCode === forgotPasswordCode.code){
+          const isValid = verifyCode(user.dataValues.id, confirmationCode, 'password');
+          if(!isValid){
+            reject('code expired/invalid');
+          }
             user.update({ password: newPasswordHash }).then(result => {
               const response = {
                 newPassword: newPasswordHash
               }
                 resolve(response);
             }).catch(err => reject(err));
-          }else{
-            reject(null);
-          }
         }).catch(err => reject(err));
       })
     }
@@ -275,7 +267,7 @@ class BreweryAuth {
 
     passwordChange (body)  {
       const { oldPassword, newPassword } = body;
-      // const salt = process.env.SALT;
+      const salt = process.env.SALT;
       const newPasswordHash = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       const oldPasswordHash = Crypto.pbkdf2Sync(oldPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
