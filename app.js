@@ -6,7 +6,6 @@ const sendEmail = require('./lib/sendEmail');
 const breweryAuth = require('./breweryLike');
 const {generateCode, verifyCode} = require('./lib/codeFactory')
 const session = require('express-session');
-const add = require('./lib/session');
 const cookieParser = require('cookie-parser');
 
 const dbCredentials = {
@@ -53,26 +52,31 @@ app.use(cookieParser());
 //     setTimeout(() => console.log(req.session['jericomfa'], req.cookies.user_sid), 3000);
 // });
 
-app.use('/api', auth.JWTauthenticate(), async () => {
+app.use('/api', auth.JWTauthenticate(), (req, res, next) => {
+    const execute = async (id) => {
 
 
-    const profile = await auth.profile();
-    console.log(profile);
-    const mfaData = await auth.getMfa();
-    console.log(mfaData);
-    const setMfa = await auth.setMfa({
-        mfa: false
-    });
-    console.log(setMfa);
-    const updated = await auth.profileEdit({
-        username: 'jericooo11'
-    });
-    console.log(updated);
-    // const newPassword = await auth.passwordChange({
-    //     oldPassword: 'jecpassword', 
-    //     newPassword: Math.random().toString()
-    // });
-    // console.log(newPassword);
+        const profile = await auth.profile(id);
+        console.log(profile);
+        const mfaData = await auth.getMfa(id);
+        console.log(mfaData);
+        const setMfa = await auth.setMfa(id, {
+            mfa: false
+        });
+        console.log(setMfa);
+        const updated = await auth.profileEdit(id, {
+            username: 'jericooo11'
+        });
+        console.log(updated);
+
+        const newPassword = await auth.passwordChange(id, {
+            oldPassword: 'jecpassword', 
+            newPassword: Math.random().toString()
+        });
+        console.log(newPassword);
+    }
+    
+    execute(req.userId);
 })
 
 app.use('/api2', async () => {

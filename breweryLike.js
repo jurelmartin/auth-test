@@ -245,9 +245,9 @@ class BreweryAuth {
       })
     }
 
-    profile (body) {
+    profile (clientId) {
       return new Promise((resolve, reject) => {
-        this.repository.findByPk(payloadId, {raw: true}).then(user => {
+        this.repository.findByPk(clientId, {raw: true}).then(user => {
           const response = {
             username: user.username,
             email: user.email,
@@ -258,12 +258,12 @@ class BreweryAuth {
       });
     }
 
-    profileEdit (body)  {
+    profileEdit (clientId, body)  {
       return new Promise((resolve, reject) => {
         this.repository.update(body, {returning: true,
           plain: true,
           where: {
-          id: payloadId
+          id: clientId
         }
       }).then(user => {
             resolve(body);
@@ -271,24 +271,21 @@ class BreweryAuth {
       })
     };
 
-    passwordChange (body)  {
+    passwordChange (clientId, body)  {
       const { oldPassword, newPassword } = body;
       // const salt = process.env.SALT;
       const newPasswordHash = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       const oldPasswordHash = Crypto.pbkdf2Sync(oldPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
-        this.repository.findByPk(payloadId).then(user => {
-          console.log(user.dataValues, oldPasswordHash, newPasswordHash );
+        this.repository.findByPk(clientId).then(user => {
           if(user.dataValues.password === oldPasswordHash && user.dataValues.password !== newPasswordHash){
             user.update({password: newPassword});
           }else{
-            reject(null);
+            reject('failed to change password');
           }
         }).then(result => {
-          resolve({
-            newPassword: newPassword
-          });
-        }).catch(err => reject(err));
+          resolve('Success');
+        }).catch(err => reject('failed to change password'));
       })
     }
     
@@ -310,9 +307,9 @@ class BreweryAuth {
       })
     }
 
-    getMfa (body) {
+    getMfa (clientId) {
       return new Promise((resolve, reject) => {
-        this.repository.findByPk(payloadId, {raw: true}).then( user => {
+        this.repository.findByPk(clientId, {raw: true}).then( user => {
           const response = {
             MFA: user.MFA
           }
@@ -321,12 +318,12 @@ class BreweryAuth {
       })
     }
 
-    setMfa (body) {
+    setMfa (clientId, body) {
       return new Promise((resolve, reject) => {
         if (body.mfa !== true && body.mfa !== false){
           reject('parameter must be boolean(true/false)');
         }
-        this.repository.findByPk(payloadId).then( user => {
+        this.repository.findByPk(clientId).then( user => {
           user.update({mfa: body.mfa});
         }).then(result => {
           resolve(body);
@@ -400,6 +397,7 @@ class BreweryAuth {
                   return res.json(result)
                 })
               }
+              req.userId = user.id;
               payloadId = user.id;
               return next();
             })(req, res, next);
