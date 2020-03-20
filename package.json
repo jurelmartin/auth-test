@@ -1,6 +1,6 @@
 {
   "name": "brewery-auth-test",
-  "version": "1.1.14",
+  "version": "1.1.15",
   "description": "brewery-auth-test-bed",
   "main": "auth.js",
   "dependencies": {
