@@ -124,12 +124,10 @@ app.listen(3000, async () => {
         email: 'jec@email.com',
         password: 'jecpassword',
         username: 'jecusername',
-        phone: '1234567'
+        phone: '+639498575069'
     });
 
-
-
-    console.log(register.details);
+    console.log(register);
 
     const login = await auth.login({
         clientId: register.details.id,
@@ -151,7 +149,7 @@ app.listen(3000, async () => {
         email: 'jec@email.com',
         password: 'jecpassword',
         username: 'jecusername',
-        phone: '1234567',
+        phone: '+639498575069',
         MFA: 0
     });
 
@@ -178,13 +176,13 @@ app.listen(3000, async () => {
     console.log(confirmNoMFA2);
 
     const forgotPassword = await auth.passwordForgot({
-        clientId: confirmNoMFA2.id
+        clientId: confirmNoMFA2.details.id
     })
 
     console.log(forgotPassword);
     
     const confirmPasswordReset = await auth.passwordReset({
-        clientId: confirmNoMFA2.id,
+        clientId: confirmNoMFA2.details.id,
         confirmationCode: forgotPassword.confirmationCode,
         newPassword: 'newPassword'
     });
@@ -192,7 +190,7 @@ app.listen(3000, async () => {
     console.log(confirmPasswordReset);
 
     const loginNoMFA = await auth.login({
-        clientId: confirmNoMFA.id,
+        clientId: confirmNoMFA.details.id,
         clientSecret: 'newPassword'
     })
 
@@ -203,7 +201,7 @@ app.listen(3000, async () => {
         email: 'jec@email.com',
         password: 'jecpassword',
         username: 'jecusername',
-        phone: '1234567',
+        phone: '+639498575069',
         MFA: 1
     });
 
@@ -217,7 +215,7 @@ app.listen(3000, async () => {
     console.log(confirmMFA);
 
     const loginMFA = await auth.login({
-        clientId: confirmMFA.id,
+        clientId: confirmMFA.details.id,
         clientSecret: 'jecpassword'
     })
 

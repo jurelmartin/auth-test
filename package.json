@@ -32,7 +32,7 @@
   },
   "scripts": {
     "start": "node app,js",
-    "test": "mocha --opts test/mocha.opts.test",
+    "test": "mocha --opts test/mocha.opts.test --timeout 5000",
     "test:watch": "mocha --watch --opts test/mocha.opts.test"
   },
   "repository": {

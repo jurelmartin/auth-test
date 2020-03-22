@@ -75,6 +75,7 @@ class BreweryAuth {
 
     signup (body) {
           body.registered = 0;
+          body.confirmed = 0;
           // const salt = process.env.SALT;
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
           
@@ -105,8 +106,9 @@ class BreweryAuth {
         return new Promise((resolve, reject) => {
 
           this.repository.findByPk(clientId, { raw:true }).then(user => {
-            if(!user) { throw new Error('Invalid login!') }
-            if(validate !== user.password) { throw new Error('Invalid login!') }
+            if(!user) { reject('Invalid login!') }
+            if(validate !== user.password) { reject('Invalid login!') }
+            if(user.confirmed === 0) { reject('account not yet confirmed')}
 
               if(user.registered === 1){
 
@@ -124,7 +126,7 @@ class BreweryAuth {
                 const response = {
                   message: 'sucess. use loginMfa function' ,
                   clientId: user.id,
-                  code: generateCode(user.id, 'mfa')
+                  confirmationCode: generateCode(user.id, 'mfa')
                 }
                 resolve(response);
               }
@@ -173,10 +175,6 @@ class BreweryAuth {
         if(!loginSession[clientId]){
           reject(null);
         }
-        const isValid = verifyCode(clientId, confirmationCode, 'mfa');
-        if(!isValid){
-          reject('invalid code');
-        }
           createTokens(clientId, this.authSecret, this.authSecret2 + clientId).then(tokens => {
             const [token, refreshToken] = tokens
             const response = {
@@ -192,15 +190,23 @@ class BreweryAuth {
   
     signupConfirm (body) {
         const { clientId, confirmationCode } = body;
+        let response; 
 
         return new Promise((resolve, reject) => {
           const isValid = verifyCode(clientId, confirmationCode, 'signup');
           if(!isValid){
-            reject('code expired/invalid');
+            reject('invalid code');
           }
-          this.repository.findByPk(clientId, {raw: true}).then(user => {
-            resolve(user);
-          }).catch(err => reject(err.message));
+          this.repository.findByPk(clientId).then(user => {
+            response = {
+              message: 'signup confirmed',
+              details: user.dataValues
+            }
+          user.update({confirmed: 1})
+          }).then(result => {
+              resolve(response);
+          })
+          .catch(err => reject(err.message));
         });
     }
 
@@ -250,6 +256,7 @@ class BreweryAuth {
           }
             user.update({ password: newPasswordHash }).then(result => {
               const response = {
+                message: 'password reset success',
                 newPassword: newPasswordHash
               }
                 resolve(response);
@@ -312,7 +319,7 @@ class BreweryAuth {
             }
           }).then(user => {
               const response = {
-                status: 'deleted',
+                message: 'deleted',
                 clientId: clientId
               }
               resolve(response);
@@ -339,7 +346,9 @@ class BreweryAuth {
         this.repository.findByPk(clientId).then( user => {
           user.update({mfa: body.mfa});
         }).then(result => {
-          resolve(body);
+          resolve({
+            MFA: body.mfa
+          });
         })
         .catch(err => reject(err));
       })
