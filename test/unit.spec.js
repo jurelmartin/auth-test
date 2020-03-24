@@ -1,23 +1,16 @@
 const {expect} = require('chai');
+const BreweryAuth = require('../index');
+const config = require('../config');
 
-const BreweryAuth = require('../breweryLike');
+describe('Brewery-auth', () => {
 
-
-describe('Brewer-auth', () => {
-    const dbCredentials = {
-        databaseName: 'yourdatabase',
-        username: 'root',
-        password: 'root',
-        dialect: 'mysql',
-        host: 'localhost',
-        authSecret: 'supersecret',
-        autSecret2: 'supersecret2',
-        newAttrib: ['email']
-    }
+    const dbCredentials = config.dbConfig
     before(async() => {
         const repository = await auth.getRepository();
         await repository.destroy({truncate: true});
     });
+    console.log(config)
+
     const auth = new BreweryAuth(dbCredentials);
 
     context('Brewery-auth :: signup()', () => {
@@ -30,7 +23,6 @@ describe('Brewer-auth', () => {
                     phone: '+639498575069',
                     MFA: 0
                 });
-
                 expect(signupNoMFA.message).to.equal('success. use signupConfirm function');
                 expect(signupNoMFA).to.have.property('confirmationCode');
             });

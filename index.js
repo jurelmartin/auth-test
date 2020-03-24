@@ -1,25 +1,27 @@
 // FOR NON-SERVERLESS
-const InitializeDatabase = require('./lib/InitializeDatabase');
-const {createTokens, refreshTokens} = require('./lib/TokenCreations');
+require("dotenv").config();
+const DatabaseInstance = require('./lib/dataSource/DatabaseInstance');
+const {createTokens, refreshTokens} = require('./lib/helpers/TokenHelper');
 const passport = require('passport');
 const { ExtractJwt, Strategy } = require('passport-jwt');
 const Crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const {generateCode, verifyCode} = require('./lib/codeFactory')
-require("dotenv").config();
-const salt = 'superduperhardsalt'
-const Validate = require('./lib/utils/validations')
-
+const {generateCode, verifyCode} = require('./lib/helpers/RandomCodeHelper')
+const salt = require('./config').salt
+const Checker = require('./lib/utils/Checker')
 
 let loginSession = {};
 
 class BreweryAuth {
     constructor(config) {
-      this.repository = new InitializeDatabase(config).setRepository()
+      this.repository = new DatabaseInstance(config).setRepository()
       this.authSecret = config.authSecret
       this.authSecret2 = config.authSecret2
+      console.log(salt)
     }
-
+    getRepository () {
+      return this.repository;
+    };
     
     async _validateTokens(req) {
       const token = req.get('x-token');
@@ -49,10 +51,6 @@ class BreweryAuth {
       }
     }
 
-    getRepository () {
-      return this.repository;
-    };
-
     register (body) {
         // const salt = process.env.SALT;
         body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
@@ -60,7 +58,7 @@ class BreweryAuth {
         body.registered = 1;
         
         return new Promise((resolve, reject) => {
-            const checkFirst = new Validate(body).isValid()
+            const checkFirst = new Checker(body).isValid()
             if(checkFirst) {
               return resolve(checkFirst) 
             }
@@ -84,7 +82,7 @@ class BreweryAuth {
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
           
           return new Promise((resolve, reject) => {
-            const checkFirst = new Validate(body).isValid()
+            const checkFirst = new Checker(body).isValid()
             if(checkFirst) {
               return resolve(checkFirst) 
             }
