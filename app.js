@@ -102,6 +102,8 @@ app.use('/api2', async () => {
 })
 
 app.listen(3000, async () => {
+
+
     // send email
     // console.log(await sendEmail({
     //     to: 'jestanislao@stratpoint.com',
@@ -120,113 +122,113 @@ app.listen(3000, async () => {
     // console.log(await sendSMS(from, to, text));
      
 // login when user is registered by resource owner
-    const register = await auth.register({
-        email: 'jec@email.com',
-        password: 'jecpassword',
-        username: 'jecusername',
-        phone: '+639498575069'
-    });
+//     const register = await auth.register({
+//         email: 'jec@email.com',
+//         password: 'jecpassword',
+//         username: 'jecusername',
+//         phone: '+639498575069'
+//     });
 
-    console.log(register);
+//     console.log(register);
 
-    const login = await auth.login({
-        clientId: register.details.id,
-        clientSecret: 'jecpassword'
-    })
+//     const login = await auth.login({
+//         clientId: register.details.id,
+//         clientSecret: 'jecpassword'
+//     })
 
-    console.log(login);
+//     console.log(login);
 
-    const loginNewPassword = await auth.loginNewPasswordRequired({
-        clientId: login.clientId,
-        newPassword: 'jecnewpassword'
-    });
+//     const loginNewPassword = await auth.loginNewPasswordRequired({
+//         clientId: login.clientId,
+//         newPassword: 'jecnewpassword'
+//     });
 
-    console.log(loginNewPassword);
+//     console.log(loginNewPassword);
 
 
-// login after signing up non MFA
-    const signupNoMFA = await auth.signup({
-        email: 'jec@email.com',
-        password: 'jecpassword',
-        username: 'jecusername',
-        phone: '+639498575069',
-        MFA: 0
-    });
+// // login after signing up non MFA
+//     const signupNoMFA = await auth.signup({
+//         email: 'jec@email.com',
+//         password: 'jecpassword',
+//         username: 'jecusername',
+//         phone: '+639498575069',
+//         MFA: 0
+//     });
 
-    console.log(signupNoMFA);
+//     console.log(signupNoMFA);
 
-    const confirmNoMFA = await auth.signupConfirm({
-        clientId: signupNoMFA.clientId,
-        confirmationCode: signupNoMFA.confirmationCode,
-    });
+//     const confirmNoMFA = await auth.signupConfirm({
+//         clientId: signupNoMFA.clientId,
+//         confirmationCode: signupNoMFA.confirmationCode,
+//     });
 
-    console.log(confirmNoMFA);
+//     console.log(confirmNoMFA);
 
-    const signupNoMFAResend = await auth.signupResend({
-        clientId: signupNoMFA.clientId
-    });
+//     const signupNoMFAResend = await auth.signupResend({
+//         clientId: signupNoMFA.clientId
+//     });
 
-    console.log(signupNoMFAResend);
+//     console.log(signupNoMFAResend);
 
-    const confirmNoMFA2 = await auth.signupConfirm({
-        clientId: signupNoMFAResend.clientId,
-        confirmationCode: signupNoMFAResend.confirmationCode,
-    });
+//     const confirmNoMFA2 = await auth.signupConfirm({
+//         clientId: signupNoMFAResend.clientId,
+//         confirmationCode: signupNoMFAResend.confirmationCode,
+//     });
 
-    console.log(confirmNoMFA2);
+//     console.log(confirmNoMFA2);
 
-    const forgotPassword = await auth.passwordForgot({
-        clientId: confirmNoMFA2.details.id
-    })
+//     const forgotPassword = await auth.passwordForgot({
+//         clientId: confirmNoMFA2.details.id
+//     })
 
-    console.log(forgotPassword);
+//     console.log(forgotPassword);
     
-    const confirmPasswordReset = await auth.passwordReset({
-        clientId: confirmNoMFA2.details.id,
-        confirmationCode: forgotPassword.confirmationCode,
-        newPassword: 'newPassword'
-    });
+//     const confirmPasswordReset = await auth.passwordReset({
+//         clientId: confirmNoMFA2.details.id,
+//         confirmationCode: forgotPassword.confirmationCode,
+//         newPassword: 'newPassword'
+//     });
 
-    console.log(confirmPasswordReset);
+//     console.log(confirmPasswordReset);
 
-    const loginNoMFA = await auth.login({
-        clientId: confirmNoMFA.details.id,
-        clientSecret: 'newPassword'
-    })
+//     const loginNoMFA = await auth.login({
+//         clientId: confirmNoMFA.details.id,
+//         clientSecret: 'newPassword'
+//     })
 
-    console.log(loginNoMFA);
+//     console.log(loginNoMFA);
     
-// login after signing up non MFA
-    const signupMFA = await auth.signup({
-        email: 'jec@email.com',
-        password: 'jecpassword',
-        username: 'jecusername',
-        phone: '+639498575069',
-        MFA: 1
-    });
+// // login after signing up non MFA
+//     const signupMFA = await auth.signup({
+//         email: 'jec@email.com',
+//         password: 'jecpassword',
+//         username: 'jecusername',
+//         phone: '+639498575069',
+//         MFA: 1
+//     });
 
-    console.log(signupMFA);
+//     console.log(signupMFA);
 
-    const confirmMFA = await auth.signupConfirm({
-        clientId: signupMFA.clientId,
-        confirmationCode: signupMFA.confirmationCode,
-    });
+//     const confirmMFA = await auth.signupConfirm({
+//         clientId: signupMFA.clientId,
+//         confirmationCode: signupMFA.confirmationCode,
+//     });
 
-    console.log(confirmMFA);
+//     console.log(confirmMFA);
 
-    const loginMFA = await auth.login({
-        clientId: confirmMFA.details.id,
-        clientSecret: 'jecpassword'
-    })
+//     const loginMFA = await auth.login({
+//         clientId: confirmMFA.details.id,
+//         clientSecret: 'jecpassword'
+//     })
 
 
-    console.log(loginMFA);
+//     console.log(loginMFA);
 
-    const finalLoginMFA = await auth.loginMfa({
-        clientId: loginMFA.clientId,
-        confirmationCode: loginMFA.code
-    })
+//     const finalLoginMFA = await auth.loginMfa({
+//         clientId: loginMFA.clientId,
+//         confirmationCode: loginMFA.code
+//     })
 
-    console.log(finalLoginMFA);
+//     console.log(finalLoginMFA);
 
 });
