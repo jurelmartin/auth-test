@@ -14,6 +14,10 @@ describe('Brewer-auth', () => {
         autSecret2: 'supersecret2',
         newAttrib: ['email']
     }
+    before(async() => {
+        const repository = await auth.getRepository();
+        await repository.destroy({truncate: true});
+    });
     const auth = new BreweryAuth(dbCredentials);
 
     context('Brewery-auth :: signup()', () => {

@@ -49,6 +49,10 @@ class BreweryAuth {
       }
     }
 
+    getRepository () {
+      return this.repository;
+    };
+
     register (body) {
         // const salt = process.env.SALT;
         body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
