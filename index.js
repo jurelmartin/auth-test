@@ -8,7 +8,9 @@ const Crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const {generateCode, verifyCode} = require('./lib/helpers/RandomCodeHelper')
 const salt = require('./config').salt
-const Checker = require('./lib/utils/Checker')
+const Checker = require('./lib/utils/Checker');
+const { sendEmail } = require('./lib/services/Email');
+const { sendSms } = require('./lib/services/Sms');
 
 let loginSession = {};
 
@@ -17,6 +19,8 @@ class BreweryAuth {
       this.repository = new DatabaseInstance(config).setRepository()
       this.authSecret = config.authSecret
       this.authSecret2 = config.authSecret2
+      this.senderEmail = 'thebrewery@stratpoint-noreply.com',
+      this.senderSMS = 'The Brewery'
       console.log(salt)
     }
     getRepository () {
@@ -80,6 +84,7 @@ class BreweryAuth {
           body.confirmed = 0;
           // const salt = process.env.SALT;
           body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
+          let code, response;
           
           return new Promise((resolve, reject) => {
             const checkFirst = new Checker(body).isValid()
@@ -88,22 +93,25 @@ class BreweryAuth {
             }
 
             this.repository.create(body , {raw: true}).then(user => {
-                const response = {
-                  message: 'success. use signupConfirm function',
-                  clientId: user.id,
-                  password: user.password,
-                  confirmationCode: generateCode(user.id, 'signup')
-                }
-              // must send a confirmation code either email, or mobile
-                resolve(response)
-              })
-              .catch(err => reject(err));        
+              code = generateCode(user.id, 'signup');
+              response = {
+                message: 'success. use signupConfirm function',
+                clientId: user.id,
+                password: user.password,
+                confirmationCode: code
+              }
+              sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+                resolve(response);
+              }).catch(err => reject(err));
+            })
+            .catch(err => reject(err));        
           })
     }
 
     login (body) {
       const { clientId, clientSecret } = body;
       const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
+      let code;
 
         return new Promise((resolve, reject) => {
 
@@ -124,25 +132,30 @@ class BreweryAuth {
                 resolve(response);
               }
               if (user.MFA === 1){
-                loginSession[user.id] = true;
-                const response = {
-                  message: 'sucess. use loginMfa function' ,
-                  clientId: user.id,
-                  confirmationCode: generateCode(user.id, 'mfa')
-                }
-                resolve(response);
+                code = generateCode(clientId, 'mfa');
+                
+                sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+                  loginSession[user.id] = true;
+                  const response = {
+                    message: 'sucess. use loginMfa function' ,
+                    clientId: user.id,
+                    confirmationCode: code
+                  }
+                  resolve(response);
+                })
+                .catch(err => reject(err));
+              }else{
+                createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
+                  const [token, refreshToken] = tokens
+                  const response = {
+                    clientId: user.id,
+                    token: token,
+                    refreshToken: refreshToken
+                  }
+                  resolve(response);
+                }).catch(err => reject(err));
               }
-
-              createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
-                const [token, refreshToken] = tokens
-                const response = {
-                  clientId: user.id,
-                  token: token,
-                  refreshToken: refreshToken
-                }
-                resolve(response);
-            }).catch(err => reject(err));
-          })
+          }).catch(err => reject(err));
         })
     }
 
@@ -158,7 +171,7 @@ class BreweryAuth {
           user.update({registered: 0, password: newPassword});
         }).then( result => {
           createTokens(clientId, this.authSecret, this.authSecret2 + hashedPassword).then(tokens => {
-            const [token, refreshToken] = tokens
+            const [token, refreshToken] = tokens;
             const response = {
               clientId: clientId,
               token: token,
@@ -190,9 +203,10 @@ class BreweryAuth {
       })
   }
   
-    signupConfirm (body) {
+    signupConfirm (body, emailContent) {
+        const { subject, text } = emailContent; 
         const { clientId, confirmationCode } = body;
-        let response; 
+        let response, userEmail; 
 
         return new Promise((resolve, reject) => {
           const isValid = verifyCode(clientId, confirmationCode, 'signup');
@@ -200,13 +214,21 @@ class BreweryAuth {
             reject('invalid code');
           }
           this.repository.findByPk(clientId).then(user => {
+            userEmail = user.dataValues.email;
             response = {
               message: 'signup confirmed',
               details: user.dataValues
             }
           user.update({confirmed: 1})
           }).then(result => {
-              resolve(response);
+            sendEmail({
+              to: userEmail,
+              from: this.senderEmail,
+              subject: subject,
+              text: text
+            });
+          }).then(result => {
+            resolve(response);
           })
           .catch(err => reject(err.message));
         });
@@ -214,31 +236,36 @@ class BreweryAuth {
 
     signupResend (body) {
       const { clientId } = body;
+      let code, response;
 
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId, {raw: true}).then(user => {
-          // sends new confirmation code, through sms or email,
-          const response = {
+          code = generateCode(user.id, 'signup');
+          response = {
             clientId: user.id,
-            confirmationCode: generateCode(user.id, 'signup')
+            confirmationCode: code
           }
           resolve(response);
+          sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+            resolve(response);
+          }).catch(err => reject(err));
         }).catch(err => reject(err.message));
       });
     }
 
     passwordForgot (body) {
       const { clientId } = body;
-
+      let code;
+      
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId, {raw: true}).then(user => {
-
+          code = generateCode(clientId, 'password');
+          sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes`);
+        }).then(result => {
           const response = {
             message: 'success. use passwordReset function',
-            confirmationCode: generateCode(clientId, 'password')
+            confirmationCode: code
           }
-    
-          // must send an email for password link
           resolve(response);
         }).catch(err => reject(err));
       })

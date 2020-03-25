@@ -4,14 +4,12 @@ const config = require('../config');
 
 describe('Brewery-auth', () => {
 
-    const dbCredentials = config.dbConfig
+    const auth = new BreweryAuth(config.dbConfig);
+    
     before(async() => {
         const repository = await auth.getRepository();
         await repository.destroy({truncate: true});
     });
-    console.log(config)
-
-    const auth = new BreweryAuth(dbCredentials);
 
     context('Brewery-auth :: signup()', () => {
         context('when inputs are valid', () => {
@@ -75,7 +73,7 @@ describe('Brewery-auth', () => {
         context('when inputs are valid', () => {
             it('should return user info', async () => {
                 const signupNoMFA = await auth.signup({
-                    email: 'jec@email.com',
+                    email: 'jestanislao@stratpoint.com',
                     password: 'jecpassword',
                     username: 'jecusername',
                     phone: '+639498575069',
@@ -85,6 +83,9 @@ describe('Brewery-auth', () => {
                 const confirmNoMFA = await auth.signupConfirm({
                     clientId: signupNoMFA.clientId,
                     confirmationCode: signupNoMFA.confirmationCode,
+                },{
+                    subject: 'The Brewery',
+                    text: 'Welcome to the Brewery'
                 });
             
                 expect (confirmNoMFA.message).to.equal('signup confirmed');            
@@ -151,6 +152,9 @@ describe('Brewery-auth', () => {
                     const confirmNoMFA = await auth.signupConfirm({
                         clientId: signupNoMFA.clientId,
                         confirmationCode: signupNoMFA.confirmationCode,
+                    },{
+                        subject: 'The Brewery',
+                        text: 'Welcome to the Brewery'
                     });
     
                     const loginNoMFA = await auth.login({
@@ -175,13 +179,16 @@ describe('Brewery-auth', () => {
                     const confirmNoMFA = await auth.signupConfirm({
                         clientId: signupNoMFA.clientId,
                         confirmationCode: signupNoMFA.confirmationCode,
+                    },  {
+                        subject: 'The Brewery',
+                        text: 'Welcome to the Brewery'
                     });
     
                     const loginMFA = await auth.login({
                         clientId: confirmNoMFA.details.id,
                         clientSecret: 'jecpassword'
                     })
-                
+                    console.log(loginMFA);
                     expect (loginMFA).to.have.property('confirmationCode');          
                 });
             });
