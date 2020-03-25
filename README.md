@@ -5,6 +5,7 @@ JWT Authentication package using PassportJs
 
 ## Table of Contents
 
+* [Requirements](#requirements)
 * [Install](#install)
 * [Usage](#usage)
 * [API](#api)
@@ -14,8 +15,8 @@ JWT Authentication package using PassportJs
 ## Requirements
 
 ```
-[SMS] Nexmo account - https://dashboard.nexmo.com/sign-in?redirect=sms
-[EMAIL] Sendgrid account - https://sendgrid.com
+[SMS] [Nexmo account] (https://dashboard.nexmo.com)
+[EMAIL] [Sendgrid account] - (https://sendgrid.com)
 ```
 
 ## Install
