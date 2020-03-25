@@ -81,7 +81,7 @@ module.exports = LoginUser;
 
 `.register({ email: '', password: '', username: '', phone: '' })`
 
-`.signupConfirm({ clientId: '', confirmationCode: '' })`
+`.signupConfirm({ body: '', msg: '' })`
 
 `.signupResend({ clientId: '' })`
 
