@@ -4,7 +4,9 @@ const config = require('../config');
 
 describe('Brewery-auth', () => {
 
-    const auth = new BreweryAuth(config.dbConfig);
+    console.log(config);
+
+    const auth = new BreweryAuth(config);
     before(async() => {
         const repository = await auth.getRepository();
         await repository.destroy({truncate: true});
@@ -78,7 +80,7 @@ describe('Brewery-auth', () => {
                     phone: '+639498575069',
                     MFA: 0
                 });
-            
+                console.log(signupNoMFA);
                 const confirmNoMFA = await auth.signupConfirm({
                     clientId: signupNoMFA.clientId,
                     confirmationCode: signupNoMFA.confirmationCode,

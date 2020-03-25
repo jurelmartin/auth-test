@@ -9,18 +9,20 @@ const jwt = require('jsonwebtoken');
 const {generateCode, verifyCode} = require('./lib/helpers/RandomCodeHelper')
 const salt = require('./config').salt
 const Checker = require('./lib/utils/Checker');
-const { sendEmail } = require('./lib/services/Email');
-const { sendSms } = require('./lib/services/Sms');
+const Email = require('./lib/services/Email');
+const Sms = require('./lib/services/Sms');
 
 let loginSession = {};
 
 class BreweryAuth {
     constructor(config) {
-      this.repository = new DatabaseInstance(config).setRepository()
-      this.authSecret = config.authSecret
-      this.authSecret2 = config.authSecret2
-      this.senderEmail = 'thebrewery@stratpoint-noreply.com',
-      this.senderSMS = 'The Brewery'
+      this.repository = new DatabaseInstance(config.dbConfig).setRepository();
+      this.sms = new Sms(config.nexmoKey, config.nexmoSecret);
+      this.email = new Email(config.sendgridKey);
+      this.authSecret = config.dbConfig.authSecret;
+      this.authSecret2 = config.dbConfig.authSecret2;
+      this.senderEmail = config.senderEmail;
+      this.senderSMS = config.senderSms;
     }
     getRepository () {
       return this.repository;
@@ -99,12 +101,13 @@ class BreweryAuth {
                 password: user.password,
                 confirmationCode: code
               }
-              sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+              
+              this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
                 resolve(response);
               }).catch(err => reject(err));
             })
             .catch(err => reject(err));        
-          })
+          });
     }
 
     login (body) {
@@ -133,7 +136,7 @@ class BreweryAuth {
               if (user.MFA === 1){
                 code = generateCode(clientId, 'mfa');
                 
-                sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+                this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
                   loginSession[user.id] = true;
                   const response = {
                     message: 'sucess. use loginMfa function' ,
@@ -220,7 +223,8 @@ class BreweryAuth {
             }
           user.update({confirmed: 1})
           }).then(result => {
-            sendEmail({
+            console.log("HELLLLLLLLLLLLO");
+            this.email.send({
               to: userEmail,
               from: this.senderEmail,
               subject: subject,
@@ -229,7 +233,7 @@ class BreweryAuth {
           }).then(result => {
             resolve(response);
           })
-          .catch(err => reject(err.message));
+          .catch(err => reject(err));
         });
     }
 
@@ -244,11 +248,10 @@ class BreweryAuth {
             clientId: user.id,
             confirmationCode: code
           }
-          resolve(response);
-          sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+          this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
             resolve(response);
           }).catch(err => reject(err));
-        }).catch(err => reject(err.message));
+        }).catch(err => reject(err));
       });
     }
 
@@ -259,7 +262,7 @@ class BreweryAuth {
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId, {raw: true}).then(user => {
           code = generateCode(clientId, 'password');
-          sendSms(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes`);
+          this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes`);
         }).then(result => {
           const response = {
             message: 'success. use passwordReset function',
