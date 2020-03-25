@@ -21,7 +21,6 @@ class BreweryAuth {
       this.authSecret2 = config.authSecret2
       this.senderEmail = 'thebrewery@stratpoint-noreply.com',
       this.senderSMS = 'The Brewery'
-      console.log(salt)
     }
     getRepository () {
       return this.repository;
