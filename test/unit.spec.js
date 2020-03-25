@@ -5,7 +5,6 @@ const config = require('../config');
 describe('Brewery-auth', () => {
 
     const auth = new BreweryAuth(config.dbConfig);
-    
     before(async() => {
         const repository = await auth.getRepository();
         await repository.destroy({truncate: true});
