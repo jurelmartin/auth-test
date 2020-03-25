@@ -101,8 +101,6 @@ module.exports = LoginUser;
 
 `.profileEdit({ clientId: '', body })`
 
-`.profileEditPhoneNumber({ clientId: '', phoneNumber: '', refreshToken: '' })`
-
 `.setMfa({ clientId: '', body })`
 
 `.getMfa({ clientId: '' })`
