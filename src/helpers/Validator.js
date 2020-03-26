@@ -1,4 +1,4 @@
-class Checker {
+class Validator {
     constructor(data){
         this.data = data
     }
@@ -50,4 +50,4 @@ class Checker {
     }
 
 }
-module.exports = Checker
+module.exports = Validator

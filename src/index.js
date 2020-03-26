@@ -7,8 +7,8 @@ const { ExtractJwt, Strategy } = require('passport-jwt');
 const Crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const {generateCode, verifyCode} = require('./lib/helpers/RandomCodeHelper')
-const salt = require('./config').salt
-const Checker = require('./lib/utils/Checker');
+const salt = require('../config').salt
+const Validator = require('../src/helpers/Validator');
 const Email = require('./lib/services/Email');
 const Sms = require('./lib/services/Sms');
 
@@ -63,7 +63,7 @@ class BreweryAuth {
         body.registered = 1;
         
         return new Promise((resolve, reject) => {
-            const checkFirst = new Checker(body).isValid()
+            const checkFirst = new Validator(body).isValid()
             if(checkFirst) {
               return resolve(checkFirst) 
             }
@@ -88,7 +88,7 @@ class BreweryAuth {
           let code, response;
           
           return new Promise((resolve, reject) => {
-            const checkFirst = new Checker(body).isValid()
+            const checkFirst = new Validator(body).isValid()
             if(checkFirst) {
               return resolve(checkFirst) 
             }
