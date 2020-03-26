@@ -1,16 +1,21 @@
 # brewery-auth-test
 
-JWT Authentication package using PassportJs 
+JWT Authentication package using PassportJs
 
 
 ## Table of Contents
 
+* [Requirements](#requirements)
 * [Install](#install)
 * [Usage](#usage)
 * [API](#api)
 * [Contributors](#contributors)
 * [License](#license)
 
+## Requirements
+
+* [Nexmo account](https://dashboard.nexmo.com)
+* [Sendgrid account](https://sendgrid.com)
 
 ## Install
 
@@ -39,18 +44,26 @@ class LoginUser extends Operation {
     const { clientId, clientSecret } = data;
 
 
-    const dbCredentials = {
-      databaseName: process.env.DB_NAME,
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      dialect: process.env.DB_DIALECT,
-      host: process.env.DB_HOST,
-      authSecret: process.env.SECRET1,
-      autSecret2: process.env.SECRET2,
-    };
+    const config = {
+    dbConfig: {
+        databaseName: process.env.DB_NAME,
+        username: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        dialect: process.env.DB_DIALECT,
+        host: process.env.DB_HOST,
+        authSecret: process.env.SECRET1,
+        authSecret2: process.env.SECRET2,
+    },
+    salt: process.env.SALT,
+    nexmoSecret: process.env.NEXMO_API_SECRET,
+    nexmoKey: process.env.NEXMO_API_KEY,
+    sendgridKey: process.env.SENDGRID_API_KEY,
+    senderEmail: process.env.SENDER_EMAIL,
+    senderSms: process.env.SENDER_SMS 
+  };
 
     try {
-      const tokens = new BreweryAuth(dbCredentials).login({ clientId, clientSecret });
+      const tokens = new BreweryAuth(config).login({ clientId, clientSecret });
       
       tokens.then(result=> {
         return this.emit(SUCCESS, result);
@@ -73,19 +86,34 @@ module.exports = LoginUser;
 
 ## API
 
-`BreweryAuth(dbCredentials)`
-
+`BreweryAuth({
+    dbConfig: {
+        databaseName: ,
+        username: ,
+        password: ,
+        dialect: ,
+        host: ,
+        authSecret: ,
+        authSecret2: ,
+    },
+    salt: ,
+    nexmoSecret: ,
+    nexmoKey: ,
+    sendgridKey: ,
+    senderEmail: ,
+    senderSms: 
+})`
 `.login({ clientId: '', clientSecret: '' })`
 
 `.signup({ email: '', password: '', username: '', phone: '', MFA: '' })`
 
 `.register({ email: '', password: '', username: '', phone: '' })`
 
-`.signupConfirm({ body: '', msg: '' })`
+`.signupConfirm({ clientId: '' , confirmationCode: '' }, { subject: '' , text: '' })`
 
 `.signupResend({ clientId: '' })`
 
-`.loginMfa({ clientId: '', mfaCode: '' })`
+`.loginMfa({ clientId: '', confirmationCode: '' })`
 
 `.loginNewPasswordRequired({ clientId: '', newPassword: '' })`
 
@@ -101,7 +129,7 @@ module.exports = LoginUser;
 
 `.profileEdit({ clientId: '', body })`
 
-`.setMfa({ clientId: '', body })`
+`.setMfa({ clientId: '', mfa: '' })`
 
 `.getMfa({ clientId: '' })`
 
