@@ -275,14 +275,21 @@ class BreweryAuth {
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId, {raw: true}).then(user => {
           code = generateCode(clientId, 'password');
-          this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes`);
-        }).then(result => {
           const response = {
             message: 'success. use passwordReset function',
             confirmationCode: code
           }
           resolve(response);
-        }).catch(err => reject(err));
+          // this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes`);
+        })
+        // .then(result => {
+        //   const response = {
+        //     message: 'success. use passwordReset function',
+        //     confirmationCode: code
+        //   }
+        //   resolve(response);
+        // })
+        .catch(err => reject(err));
       })
     
     };
@@ -393,7 +400,6 @@ class BreweryAuth {
     setMfa (clientId, body) {
       return new Promise((resolve, reject) => {
         const { mfa } = body;
-        console.log(typeof mfa);
         if(typeof mfa !== 'boolean') {reject ('mfa must boolean')};
         this.repository.update({MFA: mfa}, {returning: true,
           plain: true,
