@@ -1,16 +1,16 @@
 // FOR NON-SERVERLESS
 require("dotenv").config();
-const DatabaseInstance = require('./lib/dataSource/DatabaseInstance');
-const {createTokens, refreshTokens} = require('./lib/helpers/TokenHelper');
+const DatabaseInstance = require('./helpers/dataSource/DatabaseInstance');
+const {createTokens, refreshTokens} = require('./helpers/TokenHelper');
 const passport = require('passport');
 const { ExtractJwt, Strategy } = require('passport-jwt');
 const Crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const {generateCode, verifyCode} = require('./lib/helpers/RandomCodeHelper')
+const {generateCode, verifyCode} = require('./helpers/RandomCodeHelper')
 const salt = require('../config').salt
 const Validator = require('../src/helpers/Validator');
-const Email = require('./lib/services/Email');
-const Sms = require('./lib/services/Sms');
+const Email = require('./services/Email');
+const Sms = require('./services/Sms');
 
 let loginSession = {};
 
@@ -113,13 +113,13 @@ class BreweryAuth {
     login (body) {
       const { clientId, clientSecret } = body;
       const validate = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
-      let code;
+      let code, response;
 
         return new Promise((resolve, reject) => {
 
           this.repository.findByPk(clientId, { raw:true }).then(user => {
-            if(!user) { reject('Invalid login!') }
-            if(validate !== user.password) { reject('Invalid login!') }
+            if(!user) { throw (new Error('Invalid login!')) }
+            if(validate !== user.password) { throw (new Error('Invalid login!')) }
             if(user.confirmed === 0) { reject('account not yet confirmed')}
 
               if(user.registered === 1){
