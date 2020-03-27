@@ -10,14 +10,14 @@ const {generateCode, verifyCode} = require('./helpers/RandomCodeHelper')
 const salt = require('../config').salt
 const Validator = require('../src/helpers/Validator');
 const Email = require('./services/Email');
-const Sms = require('./services/Sms');
+// const Sms = require('./services/Sms');
 
 let loginSession = {};
 
 class BreweryAuth {
     constructor(config) {
       this.repository = new DatabaseInstance(config.dbConfig).setRepository();
-      this.sms = new Sms(config.nexmoKey, config.nexmoSecret);
+      // this.sms = new Sms(config.nexmoKey, config.nexmoSecret);
       this.email = new Email(config.sendgridKey);
       this.authSecret = config.dbConfig.authSecret;
       this.authSecret2 = config.dbConfig.authSecret2;
@@ -107,10 +107,10 @@ class BreweryAuth {
                 password: user.password,
                 confirmationCode: code
               }
-              
-              this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
                 resolve(response);
-              }).catch(err => reject(err));
+              // this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+              //   resolve(response);
+              // }).catch(err => reject(err));
             })
             .catch(err => reject(err));        
           });
@@ -253,9 +253,11 @@ class BreweryAuth {
             clientId: user.id,
             confirmationCode: code
           }
-          this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
             resolve(response);
-          }).catch(err => reject(err));
+
+          // this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+          //   resolve(response);
+          // }).catch(err => reject(err));
         }).catch(err => reject(err));
       });
     }
