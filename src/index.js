@@ -31,28 +31,34 @@ class BreweryAuth {
     async _validateTokens(req) {
       const token = req.get('x-token');
       let response;
-      if(token){
-        try{
-          const { userId } = jwt.verify(token, this.authSecret)
 
-          req.clientId = userId
-        } catch(err) {
-          const refreshToken = req.get('x-refresh-token');
-
-          let result = await refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2);
-          const { clientId, token: token_2, refreshToken: refreshToken_1 } = result;
-          if (token_2 && refreshToken_1) {
-            response = {
-              status: 401,
-              message: 'Token Expired, Please renew',
-              Tokens: {
-                AccesToken: token_2,
-                RefreshToken: refreshToken_1
-              }
-            };
-          }
+      if(!token) {
+          response = {
+            status: 401,
+            message: 'Not Authenticated'
+          };
           return response;
+      }
+      try{
+        const { userId } = jwt.verify(token, this.authSecret)
+
+        req.clientId = userId
+      } catch(err) {
+        const refreshToken = req.get('x-refresh-token');
+
+        let result = await refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2);
+        const { clientId, token: token_2, refreshToken: refreshToken_1 } = result;
+        if (token_2 && refreshToken_1) {
+          response = {
+            status: 401,
+            message: 'Token Expired, Please renew',
+            Tokens: {
+              AccesToken: token_2,
+              RefreshToken: refreshToken_1
+            }
+          };
         }
+        return response;
       }
     }
 
@@ -451,7 +457,6 @@ class BreweryAuth {
                 })
               }
               req.userId = user.id;
-              payloadId = user.id;
               return next();
             })(req, res, next);
           }
