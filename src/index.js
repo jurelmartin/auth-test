@@ -229,7 +229,6 @@ class BreweryAuth {
             }
           user.update({confirmed: 1})
           }).then(result => {
-            console.log("HELLLLLLLLLLLLO");
             this.email.send({
               to: userEmail,
               from: this.senderEmail,
@@ -367,8 +366,11 @@ class BreweryAuth {
     getMfa (clientId) {
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId, {raw: true}).then( user => {
+          let mfa;
+          if(user.MFA === 1) { mfa = true };
+          if(user.MFA === 0) { mfa = false }
           const response = {
-            MFA: user.MFA
+            MFA: mfa
           }
           resolve(response);
         }).catch(err => reject(err));
@@ -377,17 +379,20 @@ class BreweryAuth {
 
     setMfa (clientId, body) {
       return new Promise((resolve, reject) => {
-        if (body.mfa !== true && body.mfa !== false){
-          reject('parameter must be boolean(true/false)');
+        const { mfa } = body;
+        console.log(typeof mfa);
+        if(typeof mfa !== 'boolean') {reject ('mfa must boolean')};
+        this.repository.update({MFA: mfa}, {returning: true,
+          plain: true,
+          where: {
+          id: clientId
         }
-        this.repository.findByPk(clientId).then( user => {
-          user.update({mfa: body.mfa});
-        }).then(result => {
-          resolve({
-            MFA: body.mfa
-          });
-        })
-        .catch(err => reject(err));
+      }).then(user => {
+          if(!user){reject ('user does not exist')}
+            resolve({
+              MFA: mfa
+            });
+        }).catch(err => reject(err));
       })
     }
 
