@@ -142,16 +142,22 @@ class BreweryAuth {
               if (user.MFA === 1){
                 code = generateCode(clientId, 'mfa');
                 
-                this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
-                  loginSession[user.id] = true;
-                  const response = {
-                    message: 'sucess. use loginMfa function' ,
-                    clientId: user.id,
-                    confirmationCode: code
-                  }
-                  resolve(response);
-                })
-                .catch(err => reject(err));
+                // this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
+                //   loginSession[user.id] = true;
+                //   const response = {
+                //     message: 'sucess. use loginMfa function' ,
+                //     clientId: user.id,
+                //     confirmationCode: code
+                //   }
+                //   resolve(response);
+                // })
+                // .catch(err => reject(err));
+                const response = {
+                  message: 'sucess. use loginMfa function' ,
+                  clientId: user.id,
+                  confirmationCode: code
+                }
+                resolve(response);
               }else{
                 createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
                   const [token, refreshToken] = tokens
@@ -349,11 +355,16 @@ class BreweryAuth {
     
     deleteUser (body) {
       const { clientId, clientSecret } = body;
+      const secret = Crypto.pbkdf2Sync(clientSecret, salt, 1000, 64, `sha512`).toString(`hex`);
+
       
       return new Promise((resolve, reject) => {
           this.repository.findByPk(clientId).then(user => {
-            if(user.password === clientSecret){
+            if(!user){ reject ('user not found')}
+            if(user.password === secret){
               user.destroy();
+            }else{
+              reject('invalid credentials');
             }
           }).then(user => {
               const response = {
