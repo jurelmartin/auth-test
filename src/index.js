@@ -350,7 +350,7 @@ class BreweryAuth {
       return new Promise((resolve, reject) => {
         this.repository.findByPk(clientId).then(user => {
           if(user.dataValues.password === oldPasswordHash && user.dataValues.password !== newPasswordHash){
-            user.update({password: newPassword});
+            user.update({password: newPasswordHash});
           }else{
             reject('failed to change password');
           }

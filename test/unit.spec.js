@@ -296,46 +296,46 @@ describe('Brewery-auth', () => {
     //         });
     //     });
     // });
-    // context('Brewery-auth :: passwordReset()', () => {
-    //     context('when inputs are valid', () => {
-    //         it('should return confirmation code', async () => {
-    //             const signupNoMFA = await auth.signup({
-    //                 email: 'jec@email.com',
-    //                 password: 'jecpassword',
-    //                 username: 'jecusername',
-    //                 phone: '+639498575069',
-    //                 MFA: 0
-    //             });
+    context('Brewery-auth :: passwordReset()', () => {
+        context('when inputs are valid', () => {
+            it('should return confirmation code', async () => {
+                const signupNoMFA = await auth.signup({
+                    email: 'jec@email.com',
+                    password: 'jecpassword',
+                    username: 'jecusername',
+                    phone: '+639498575069',
+                    MFA: 0
+                });
 
-    //             const forgotPassword = await auth.passwordForgot({
-    //                 clientId: signupNoMFA.clientId
-    //             });
+                const forgotPassword = await auth.passwordForgot({
+                    clientId: signupNoMFA.clientId
+                });
 
-    //             const confirmPasswordReset = await auth.passwordReset({
-    //                 clientId: signupNoMFA.clientId,
-    //                 confirmationCode: forgotPassword.confirmationCode,
-    //                 newPassword: 'newPassword'
-    //             });
-    //             expect(confirmPasswordReset.message).to.equal('password reset success');
-    //             expect(confirmPasswordReset).to.have.property('newPassword');
-    //         });
-    //     });
-    //     context('when inputs are invalid', () => {
-    //         it('should return error', async () => {
-    //             it('should return error', async () => {
-    //                 try{
-    //                     await auth.passwordReset({
-    //                         clientId: 'dummyId',
-    //                         confirmationCode: 'dummyCode',
-    //                         newPassword: 'newPassword'
-    //                     });
-    //                 }catch(err){
-    //                     expect(err);
-    //                 }           
-    //             })
-    //         });
-    //     });
-    // });
+                const confirmPasswordReset = await auth.passwordReset({
+                    clientId: signupNoMFA.clientId,
+                    confirmationCode: forgotPassword.confirmationCode,
+                    newPassword: 'newPassword'
+                });
+                expect(confirmPasswordReset.message).to.equal('password reset success');
+                expect(confirmPasswordReset).to.have.property('newPassword');
+            });
+        });
+        context('when inputs are invalid', () => {
+            it('should return error', async () => {
+                it('should return error', async () => {
+                    try{
+                        await auth.passwordReset({
+                            clientId: 'dummyId',
+                            confirmationCode: 'dummyCode',
+                            newPassword: 'newPassword'
+                        });
+                    }catch(err){
+                        expect(err);
+                    }           
+                })
+            });
+        });
+    });
     // context('Brewery-auth :: profile()', () => {
     //     context('when inputs are valid', () => {
     //         it('should return user data', async () => {
@@ -490,38 +490,38 @@ describe('Brewery-auth', () => {
     //         });
     //     });
     // });
-    context('Brewery-auth :: deleteUser()', () => {
-        context('when inputs are valid', () => {
-            it('return deleted', async () => {
-                const signupMFA = await auth.signup({
-                    email: 'jec@email.com',
-                    password: 'jecpassword',
-                    username: 'jecusername',
-                    phone: '+639498575069',
-                    MFA: 1
-                });
+    // context('Brewery-auth :: deleteUser()', () => {
+    //     context('when inputs are valid', () => {
+    //         it('return deleted', async () => {
+    //             const signupMFA = await auth.signup({
+    //                 email: 'jec@email.com',
+    //                 password: 'jecpassword',
+    //                 username: 'jecusername',
+    //                 phone: '+639498575069',
+    //                 MFA: 1
+    //             });
 
-                const deleteUser = await auth.deleteUser({
-                    clientId: 'b8146029-6c4d-405f-b560-cbe2c8c1e818',
-                    clientSecret: 'jecpassword'
-                });
+    //             const deleteUser = await auth.deleteUser({
+    //                 clientId: 'b8146029-6c4d-405f-b560-cbe2c8c1e818',
+    //                 clientSecret: 'jecpassword'
+    //             });
 
-                expect(deleteUser.message).to.equal('deleted');
-            });
-        });
-        context('when inputs are invalid', () => {
-            it('should return error', async () => {
-                it('should return error', async () => {
-                    try{
-                        await auth.deleteUser({
-                            clientId: 'dummyId',
-                            password: 'jecpassword'
-                        });
-                    }catch(err){
-                        expect(err);
-                    }           
-                })
-            });
-        });
-    });
+    //             expect(deleteUser.message).to.equal('deleted');
+    //         });
+    //     });
+    //     context('when inputs are invalid', () => {
+    //         it('should return error', async () => {
+    //             it('should return error', async () => {
+    //                 try{
+    //                     await auth.deleteUser({
+    //                         clientId: 'dummyId',
+    //                         password: 'jecpassword'
+    //                     });
+    //                 }catch(err){
+    //                     expect(err);
+    //                 }           
+    //             })
+    //         });
+    //     });
+    // });
 })
