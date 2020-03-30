@@ -184,7 +184,7 @@ class BreweryAuth {
           reject(null);
         }
         this.repository.findByPk(clientId).then(user => {
-          user.update({registered: 0, password: newPassword});
+          user.update({registered: 0, password: hashedPassword});
         }).then( result => {
           createTokens(clientId, this.ATSecret, this.RTSecret + hashedPassword).then(tokens => {
             const [token, refreshToken] = tokens;
