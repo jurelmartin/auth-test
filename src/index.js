@@ -328,13 +328,15 @@ class BreweryAuth {
             if(checkFirst) {
               return resolve(checkFirst) 
             }
-        this.repository.update(body, {returning: true,
-          plain: true,
-          where: {
-          id: clientId
-        }
-      }).then(user => {
-            resolve('user info updated');
+        this.repository.findByPk(clientId).then(user => {
+          if(!user) {
+            reject('User not found!');
+          }
+          user.update(body, {returning: true,
+            plain: true
+        }).then(user => {
+              resolve('user info updated');
+          }).catch(err => reject(err));
         }).catch(err => reject(err));
       })
     };
