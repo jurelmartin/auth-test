@@ -324,13 +324,17 @@ class BreweryAuth {
 
     profileEdit (clientId, body)  {
       return new Promise((resolve, reject) => {
+        const checkFirst = new Validator(body).isValidUpdate()
+            if(checkFirst) {
+              return resolve(checkFirst) 
+            }
         this.repository.update(body, {returning: true,
           plain: true,
           where: {
           id: clientId
         }
       }).then(user => {
-            resolve(body);
+            resolve('user info updated');
         }).catch(err => reject(err));
       })
     };

@@ -49,5 +49,48 @@ class Validator {
         }
     }
 
+    isValidUpdate () {
+        const errors = [];
+        const { email, password, username, phone } = this.data
+
+        for (const key in this.data) {
+            if(key.toLowerCase() === 'password') {
+                throw new Error('use PasswordChange function to update password');
+            }
+            if(key.toLowerCase() === 'mfa') {
+                throw new Error('use setMfa function to update password');
+            }
+
+            if (key !== 'email'){
+                if ( key !== 'username'){
+                    if ( key !== 'phone') {
+                        throw new Error (`invalid property ${key}`);
+                        break;
+                    }
+                }
+            }
+        }
+        if(email){
+            const checkEmail = this._validate(email)
+
+        if(!checkEmail) {
+            errors.push('Please input a vaid email!');
+        }
+        }
+
+        if(phone) {
+            const checkNumber = /((^(\+)(\d){12}$)|(^\d{11}$))/
+            if(!checkNumber.test(phone)){
+            errors.push('Invalid phone number!')
+        }
+        }
+        
+        if(errors.length > 0){
+            let error = {}
+            error.message = errors;
+            return error;  
+        }
+    }
+
 }
 module.exports = Validator
