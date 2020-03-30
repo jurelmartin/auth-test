@@ -307,15 +307,15 @@ describe('Brewery-auth', () => {
                     MFA: 0
                 });
 
-                const forgotPassword = await auth.passwordForgot({
-                    clientId: signupNoMFA.clientId
-                });
+                // const forgotPassword = await auth.passwordForgot({
+                //     clientId: signupNoMFA.clientId
+                // });
 
-                const confirmPasswordReset = await auth.passwordReset({
-                    clientId: signupNoMFA.clientId,
-                    confirmationCode: forgotPassword.confirmationCode,
-                    newPassword: 'newPassword'
-                });
+                // const confirmPasswordReset = await auth.passwordReset({
+                //     clientId: signupNoMFA.clientId,
+                //     confirmationCode: forgotPassword.confirmationCode,
+                //     newPassword: 'newPassword'
+                // });
                 expect(confirmPasswordReset.message).to.equal('password reset success');
                 expect(confirmPasswordReset).to.have.property('newPassword');
             });

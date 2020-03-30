@@ -12,8 +12,6 @@ const Validator = require('../src/helpers/Validator');
 const Email = require('./services/Email');
 // const Sms = require('./services/Sms');
 
-let loginSession = {};
-
 class BreweryAuth {
     constructor(config) {
       this.repository = new DatabaseInstance(config.dbConfig).setRepository();
@@ -129,8 +127,6 @@ class BreweryAuth {
             if(user.confirmed === 0) { reject('account not yet confirmed')}
 
               if(user.registered === 1){
-
-                loginSession[user.id] = true;
                 
                 const response = {
                   clientId: user.id,
@@ -143,7 +139,6 @@ class BreweryAuth {
                 code = generateCode(clientId, 'mfa');
                 
                 // this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
-                //   loginSession[user.id] = true;
                 //   const response = {
                 //     message: 'sucess. use loginMfa function' ,
                 //     clientId: user.id,
@@ -178,11 +173,8 @@ class BreweryAuth {
       // const salt = process.env.SALT;
       const hashedPassword = Crypto.pbkdf2Sync(newPassword, salt, 1000, 64, `sha512`).toString(`hex`);
       return new Promise((resolve, reject) => {
-        if(!loginSession[clientId]){
-          reject(null);
-        }
         this.repository.findByPk(clientId).then(user => {
-          user.update({registered: 0, password: newPassword});
+          user.update({registered: 0, password: hashedPassword});
         }).then( result => {
           createTokens(clientId, this.authSecret, this.authSecret2 + hashedPassword).then(tokens => {
             const [token, refreshToken] = tokens;
@@ -191,7 +183,6 @@ class BreweryAuth {
               token: token,
               refreshToken: refreshToken
             }
-            loginSession[clientId] = null;
             resolve(response);
           })
         }).catch(err => resolve(err));
@@ -201,9 +192,6 @@ class BreweryAuth {
     loginMfa (body) {
       const { clientId, confirmationCode } = body
       return new Promise((resolve, reject) => {
-        if(!loginSession[clientId]){
-          reject(null);
-        }
         const isValid = verifyCode(clientId, confirmationCode, 'mfa');
           if(!isValid){
             reject('invalid code');
@@ -215,7 +203,6 @@ class BreweryAuth {
               token: token,
               refreshToken: refreshToken
             }
-            loginSession[clientId] = null;
             resolve(response);
           })
       })
