@@ -204,6 +204,10 @@ class BreweryAuth {
         if(!loginSession[clientId]){
           reject(null);
         }
+        const isValid = verifyCode(clientId, confirmationCode, 'mfa');
+          if(!isValid){
+            reject('invalid code');
+          }
           createTokens(clientId, this.authSecret, this.authSecret2 + clientId).then(tokens => {
             const [token, refreshToken] = tokens
             const response = {
