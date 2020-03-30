@@ -137,7 +137,7 @@ class BreweryAuth {
                 };
                 resolve(response);
               }
-              if (user.MFA === 1){
+              if (user.MFA === true){
                 code = generateCode(clientId, 'mfa');
                 
                 // this.sms.send(this.senderSMS, user.phone, `Your code is ${code}. Expires in 5 minutes.`).then(result => {
