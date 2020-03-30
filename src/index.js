@@ -19,8 +19,8 @@ class BreweryAuth {
       this.repository = new DatabaseInstance(config.dbConfig).setRepository();
       // this.sms = new Sms(config.nexmoKey, config.nexmoSecret);
       this.email = new Email(config.sendgridKey);
-      this.authSecret = config.dbConfig.authSecret;
-      this.authSecret2 = config.dbConfig.authSecret2;
+      this.ATSecret = config.dbConfig.authSecret;
+      this.RTSecret = config.dbConfig.authSecret2;
       this.senderEmail = config.senderEmail;
       this.senderSMS = config.senderSms;
     }
@@ -40,21 +40,22 @@ class BreweryAuth {
           return response;
       }
       try{
-        const { userId } = jwt.verify(token, this.authSecret)
+        const { userId } = jwt.verify(token, this.ATSecret)
 
         req.clientId = userId
       } catch(err) {
         const refreshToken = req.get('x-refresh-token');
 
-        let result = await refreshTokens(token, refreshToken, this.repository, this.authSecret, this.authSecret2);
-        const { clientId, token: token_2, refreshToken: refreshToken_1 } = result;
-        if (token_2 && refreshToken_1) {
+        let result = await refreshTokens(token, refreshToken, this.repository, this.ATSecret, this.RTSecret);
+        const { clientId, newToken, newRefreshToken} = result;
+        if (token && refreshToken) {
           response = {
             status: 401,
             message: 'Token Expired, Please renew',
+            clientId: clientId,
             Tokens: {
-              AccesToken: token_2,
-              RefreshToken: refreshToken_1
+              AccesToken: newToken,
+              RefreshToken: newRefreshToken
             }
           };
         }
@@ -64,7 +65,8 @@ class BreweryAuth {
 
     register (body) {
         // const salt = process.env.SALT;
-        body.password = Crypto.pbkdf2Sync(body.password, salt, 1000, 64, `sha512`).toString(`hex`);
+        const { username } = body
+        body.password = Crypto.createHash('SHA256').update(new Date().getTime() + username).digest('hex');
         body.MFA = 0;
         body.registered = 1;
         
@@ -159,7 +161,7 @@ class BreweryAuth {
                 }
                 resolve(response);
               }else{
-                createTokens(user.id, this.authSecret, this.authSecret2+user.password).then(tokens => {
+                createTokens(user.id, this.ATSecret, this.RTSecret+user.password).then(tokens => {
                   const [token, refreshToken] = tokens
                   const response = {
                     clientId: user.id,
@@ -184,7 +186,7 @@ class BreweryAuth {
         this.repository.findByPk(clientId).then(user => {
           user.update({registered: 0, password: newPassword});
         }).then( result => {
-          createTokens(clientId, this.authSecret, this.authSecret2 + hashedPassword).then(tokens => {
+          createTokens(clientId, this.ATSecret, this.RTSecret + hashedPassword).then(tokens => {
             const [token, refreshToken] = tokens;
             const response = {
               clientId: clientId,
@@ -208,7 +210,7 @@ class BreweryAuth {
           if(!isValid){
             reject('invalid code');
           }
-          createTokens(clientId, this.authSecret, this.authSecret2 + clientId).then(tokens => {
+          createTokens(clientId, this.ATSecret, this.RTSecret + clientId).then(tokens => {
             const [token, refreshToken] = tokens
             const response = {
               clientId: clientId,
@@ -452,7 +454,7 @@ class BreweryAuth {
     
     JWTauthenticate () {
       const repository = this.repository
-      const configSecret = this.authSecret
+      const configSecret = this.ATSecret
 
         return [
           (req, res, next) => {
