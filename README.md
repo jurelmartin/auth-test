@@ -156,21 +156,53 @@ If you want to log the Client out, just use this api and just pass in the reques
 .logout(req,res)
 ```
 
-`.passwordForgot({ clientId: '' })`
+If you forgot your password, use this send a to request. A confirmation code will be sent to your phone number
 
-`.passwordReset({ clientId: '', confirmationCode: '', newPassword: '' })`
+```js
+.passwordForgot({ clientId: '' })
+```
 
-`.passwordChange({ oldPassword: '', newPassword: '' })`
+Once confirmation code from passwordForgot is sent, use this to set new password
 
-`.profile({ clientId: '' })`
+```js
+.passwordReset({ clientId: '', confirmationCode: '', newPassword: '' })
+```
 
-`.profileEdit({ clientId: '', body })`
+Change user password. Used when user knows the old password, and wants to change it.
 
-`.setMfa({ clientId: '', mfa: '' })`
+```js
+.passwordChange({ oldPassword: '', newPassword: '' })
+```
 
-`.getMfa({ clientId: '' })`
 
-`.deleteUser({ clientId: '', clientSecret: '' })`
+View user profile
+
+```js
+.profile({ clientId: '' })
+```
+
+Update user profile
+
+```js
+.profileEdit({ clientId: '', body })
+```
+
+Update user multifactor authentication setting
+```js
+.setMfa({ clientId: '', mfa: '' })
+```
+
+View current user multifactor-authentication setting
+
+```js
+.getMfa({ clientId: '' })
+```
+
+Delete user information
+
+```js
+.deleteUser({ clientId: '', clientSecret: '' })
+```
 
 For your resources that needed protection or authentication you can attach this api and use it on your routes first.
 
