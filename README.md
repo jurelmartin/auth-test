@@ -1,6 +1,6 @@
 # brewery-auth-test
 
-JWT Authentication package using PassportJs
+Authentication package using PassportJs
 
 
 ## Table of Contents
@@ -108,24 +108,53 @@ BreweryAuth({
 })
 ```
 
-For logging in a client you need to pass a Client Id and Password and it will return a Access Token and Refresh Token
+For logging in a Client you need to pass a Client Id and Password and it will return a Access Token and Refresh Token.
 
 ```javascript
-`.login({ clientId: '', clientSecret: '' })`
+.login({ clientId: '', clientSecret: '' })
 ```
-`.signup({ email: '', password: '', username: '', phone: '', MFA: '' })`
 
-`.register({ email: '', password: '', username: '', phone: '' })`
+If a Client does not exist yet, you can signup first by using this api and passing the fields needed.
 
-`.signupConfirm({ clientId: '' , confirmationCode: '' }, { subject: '' , text: '' })`
+```js
+.signup({ email: '', password: '', username: '', phone: '', MFA: '' })
+```
 
-`.signupResend({ clientId: '' })`
+If you have an existing user and just need to register a client just use this api and pass the following fields.
 
-`.loginMfa({ clientId: '', confirmationCode: '' })`
+```js
+.register({ email: '', password: '', username: '', phone: '' })
+```
 
-`.loginNewPasswordRequired({ clientId: '', newPassword: '' })`
+After you use  the signup api, you can execute this api after so can recieve a confirmation code and an email.
 
-`.logout(req,res)`
+```js
+.signupConfirm({ clientId: '' , confirmationCode: '' }, { subject: '' , text: '' })
+```
+
+If you somehow did not recieved a confirmation code, you can use this api to resend the request by just passing the Client Id used.
+
+```js
+.signupResend({ clientId: '' })
+```
+
+If you enabled the MFA upon signup, you have to use this api and pass the confirmation code in it
+
+```js
+.loginMfa({ clientId: '', confirmationCode: '' })
+```
+
+If you change your password that was given by default upon registration you have to use this api to change it
+
+```js
+.loginNewPasswordRequired({ clientId: '', newPassword: '' })
+```
+
+If you want to log the Client out, just use this api and just pass in the request and the response
+
+```js
+.logout(req,res)
+```
 
 `.passwordForgot({ clientId: '' })`
 
@@ -143,10 +172,17 @@ For logging in a client you need to pass a Client Id and Password and it will re
 
 `.deleteUser({ clientId: '', clientSecret: '' })`
 
-`.initialize() //placed in your router to initialize authentication`
+For your resources that needed protection or authentication you can attach this api and use it on your routes first.
 
-`.JWTauthenticate() //placed in front of your protected resources`
+```js
+.initialize()
+```
 
+Then, Including this above your resources that needed authentication first
+
+```js
+.JWTauthenticate()
+```
 
 ## Contributors
 
