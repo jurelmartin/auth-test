@@ -152,12 +152,6 @@ If you change your password that was given by default upon registration you have
 .loginNewPasswordRequired({ clientId: '', newPassword: '' })
 ```
 
-If you want to log the Client out, just use this api and just pass in the request and the response
-
-```js
-.logout(req,res)
-```
-
 If you forgot your password, use this send a to request. A confirmation code will be sent to your phone number
 
 ```js
