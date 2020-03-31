@@ -17,8 +17,8 @@ class BreweryAuth {
       this.repository = new DatabaseInstance(config.dbConfig).setRepository();
       // this.sms = new Sms(config.nexmoKey, config.nexmoSecret);
       this.email = new Email(config.sendgridKey);
-      this.ATSecret = config.dbConfig.authSecret;
-      this.RTSecret = config.dbConfig.authSecret2;
+      this.ATSecret = config.tokenSecret;
+      this.RTSecret = config.refreshSecret;
       this.senderEmail = config.senderEmail;
       this.senderSMS = config.senderSms;
     }
