@@ -103,7 +103,9 @@ module.exports = LoginUser;
     senderEmail: ,
     senderSms: 
 })`
+
 For logging in a client you need to pass a Client Id and Password and it will return a Access Token and Refresh Token
+
 ```javascript
 `.login({ clientId: '', clientSecret: '' })`
 ```
