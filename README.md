@@ -19,7 +19,7 @@ Authentication package using PassportJs
 * [Nexmo account](https://dashboard.nexmo.com)
 * [Sendgrid account](https://sendgrid.com)
 ```
-NOTE: Email and SMS services temporarily unavailable.
+NOTE: Email and SMS services are temporarily unavailable.
 ```
 
 ## Install
