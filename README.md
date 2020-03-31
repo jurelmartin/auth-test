@@ -1,8 +1,9 @@
 # brewery-auth-test
 
 Authentication package using PassportJs
-[Postman Collection](https://documenter.getpostman.com/view/9738384/SzYXYKya?version=latest)
 
+## Postman
+[Postman Collection](https://documenter.getpostman.com/view/9738384/SzYXYKya?version=latest)
 
 ## Table of Contents
 
