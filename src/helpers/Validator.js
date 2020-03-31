@@ -48,7 +48,7 @@ class Validator {
             return error;  
         }
     }
-
+    
     isValidUpdate () {
         const errors = [];
         const { email, password, username, phone } = this.data

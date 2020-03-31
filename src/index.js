@@ -19,8 +19,8 @@ class BreweryAuth {
       this.email = new Email(config.sendgridKey);
       this.ATSecret = config.tokenSecret;
       this.RTSecret = config.refreshSecret;
-      this.senderEmail = config.senderEmail;
-      this.senderSMS = config.senderSms;
+      // this.senderEmail = config.senderEmail;
+      // this.senderSMS = config.senderSms;
     }
     getRepository () {
       return this.repository;

@@ -1,6 +1,7 @@
 # brewery-auth-test
 
 Authentication package using PassportJs
+[Postman Collection](https://documenter.getpostman.com/view/9738384/SzYXYKya?version=latest)
 
 
 ## Table of Contents
@@ -16,6 +17,9 @@ Authentication package using PassportJs
 
 * [Nexmo account](https://dashboard.nexmo.com)
 * [Sendgrid account](https://sendgrid.com)
+```
+NOTE: Email and SMS services temporarily unavailable.
+```
 
 ## Install
 
