@@ -62,29 +62,29 @@ class BreweryAuth {
     }
 
     register (body) {
-        // const salt = process.env.SALT;
-        const { username } = body
-        body.password = Crypto.createHash('SHA256').update(new Date().getTime() + username).digest('hex');
-        body.MFA = 0;
-        body.registered = 1;
-        
-        return new Promise((resolve, reject) => {
-            const checkFirst = new Validator(body).isValid()
-            if(checkFirst) {
-              return resolve(checkFirst) 
-            }
+      // const salt = process.env.SALT;
+      const { username } = body
+      body.password = Crypto.createHash('SHA256').update(new Date().getTime() + username).digest('hex');
+      body.MFA = 0;
+      body.registered = 1;
+      
+      return new Promise((resolve, reject) => {
+          const checkFirst = new Validator(body).isValid()
+          if(checkFirst) {
+            return resolve(checkFirst) 
+          }
 
-            this.repository.create(body, {raw: true}).then(user => {
-                const response = {
-                  message: 'Registered',
-                  details: user.dataValues
-                }
-                //must send an email for password reset link
-                resolve(response)
-              })
-              .catch(err => reject(err));        
-          })
-    }
+          this.repository.create(body).then(user => {
+              const response = {
+                message: 'Registered',
+                clientId: user.dataValues.id
+              }
+              //must send an email for password reset link
+              resolve(response)
+            })
+            .catch(err => reject(err));        
+        })
+  }
 
     signup (body) {
           body.registered = 0;
@@ -220,7 +220,7 @@ class BreweryAuth {
           if(!isValid){
             reject('invalid code');
           }
-          this.repository.findByPk(clientId).then(user => {
+          this.repository.findByPk(clientId, { attributes: {exclude: ['password', 'createdAt', 'updatedAt']} }).then(user => {
             userEmail = user.dataValues.email;
             response = {
               message: 'signup confirmed',
