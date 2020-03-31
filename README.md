@@ -86,7 +86,10 @@ module.exports = LoginUser;
 
 ## API
 
-`BreweryAuth({
+First you need to pass the needed parameters for this library like so:
+
+```javascript
+BreweryAuth({
     dbConfig: {
         databaseName: ,
         username: ,
@@ -102,7 +105,8 @@ module.exports = LoginUser;
     sendgridKey: ,
     senderEmail: ,
     senderSms: 
-})`
+})
+```
 
 For logging in a client you need to pass a Client Id and Password and it will return a Access Token and Refresh Token
 
